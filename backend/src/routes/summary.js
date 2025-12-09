@@ -36,14 +36,39 @@ router.get('/', async (req, res) => {
   const allData = await readData();
   const entries = getUserData(allData, req.userId);
   const last12 = entries.slice(-12);
+  
+  // Calculate mood and stress statistics
+  const moodScores = last12.map(e => e.mood);
+  const stressScores = last12.map(e => e.stress);
+  const avgMood = moodScores.length > 0 ? (moodScores.reduce((a, b) => a + b, 0) / moodScores.length).toFixed(2) : 0;
+  const avgStress = stressScores.length > 0 ? (stressScores.reduce((a, b) => a + b, 0) / stressScores.length).toFixed(2) : 0;
+  const maxStress = stressScores.length > 0 ? Math.max(...stressScores) : 0;
+  const minMood = moodScores.length > 0 ? Math.min(...moodScores) : 0;
+  const maxMood = moodScores.length > 0 ? Math.max(...moodScores) : 0;
+  
+  // Count mood distribution
+  const moodDist = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+  moodScores.forEach(m => moodDist[m]++);
+  
+  const dataContext = {
+    entriesCount: last12.length,
+    avgMood: parseFloat(avgMood),
+    avgStress: parseFloat(avgStress),
+    maxStress,
+    minMood,
+    maxMood,
+    moodDistribution: moodDist,
+    trendDirection: last12.length > 1 ? (moodScores[last12.length - 1] > moodScores[0] ? 'improving' : 'declining') : 'stable'
+  };
+  
   try {
-    const summaryText = await llm.generateSummary(last12);
+    const summaryText = await llm.generateSummary(last12, dataContext);
     
-    // ✅ Return summary as plain text string, not wrapped
     res.json({ 
-      summary: summaryText,  // Plain string from Groq
+      summary: summaryText,
       success: true,
-      entriesAnalyzed: last12.length
+      entriesAnalyzed: last12.length,
+      stats: dataContext
     });
   } catch (err) {
     console.error('Summary generation error:', err);

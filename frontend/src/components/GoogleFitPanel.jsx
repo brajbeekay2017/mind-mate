@@ -55,6 +55,8 @@ export default function GoogleFitPanel({ entries = [] }) {
             setShowDetails(true); // Auto-expand to show data
             setError('');
             fetchGoogleFitData(accessToken);
+            // Notify other components in the same window that Google Fit is connected
+            try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken } })); } catch(e) {}
             window.removeEventListener('message', handleMessage);
             if (authWindow && !authWindow.closed) {
               authWindow.close();
@@ -166,6 +168,7 @@ export default function GoogleFitPanel({ entries = [] }) {
     const token = localStorage.getItem('googlefit_token');
     if (token) {
       await fetchGoogleFitData(token);
+      try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken: token } })); } catch(e) {}
     }
   };
 

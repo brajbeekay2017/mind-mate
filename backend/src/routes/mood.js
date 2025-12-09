@@ -93,6 +93,31 @@ router.get('/', async (req, res) => {
   res.json({ entries: last10 });
 });
 
+// GET /mood/monthly - return all entries for a given month (query: year, month 1-12)
+router.get('/monthly', async (req, res) => {
+  try {
+    const year = parseInt(req.query.year, 10);
+    const month = parseInt(req.query.month, 10);
+    if (Number.isNaN(year) || Number.isNaN(month)) {
+      return res.status(400).json({ error: 'year and month query params required' });
+    }
+
+    const allData = await readData();
+    const entries = getUserData(allData, req.userId) || [];
+
+    const filtered = entries.filter(e => {
+      if (!e || !e.timestamp) return false;
+      const d = new Date(e.timestamp);
+      return d.getFullYear() === year && (d.getMonth() + 1) === month;
+    });
+
+    res.json({ success: true, entries: filtered });
+  } catch (err) {
+    console.error('[MOOD MONTHLY] Error:', err);
+    res.status(500).json({ error: 'Failed to fetch monthly mood entries' });
+  }
+});
+
 // POST /mood/clear - clear user's data
 router.post('/clear', async (req, res) => {
   try {
