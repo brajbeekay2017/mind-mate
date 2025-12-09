@@ -322,5 +322,26 @@ function getProviderInfo() {
 module.exports = { 
   generateChatReply, 
   generateSummary,
-  getProviderInfo
+  getProviderInfo,
+  // generateStressAssessment: returns { assessment, spoken }
+  async generateStressAssessment(ctx = {}) {
+    const { severity, avgStress, avgMood, googleFitData = {}, entries = [] } = ctx;
+    const prompt = `You are an empathetic workplace wellness coach. Produce a JSON object ONLY with two keys: "assessment" and "spoken".\n\nReturn something like:\n{ "assessment": "bullet points or short sentences", "spoken": "one paragraph friendly spoken summary" }\n\nDATA:\n- severity: ${severity}\n- avgStress: ${avgStress}\n- avgMood: ${avgMood}\n- heartPoints: ${googleFitData.heartPoints || googleFitData.heartPointsTotal || ''}\n- restingHR: ${googleFitData.restingHeartRate || googleFitData.restingHeartRateAvg || ''}\nRecent entries (up to 6):\n${(entries || []).slice(-6).map(e => `- ${e.timestamp || ''} mood:${e.mood ?? ''} stress:${e.stress ?? ''}`).join('\n')}\n\nRespond with JSON only.`;
+    try {
+      const raw = await generateChatReply(prompt);
+      // try parse JSON first
+      try {
+        const parsed = JSON.parse(raw);
+        return { assessment: parsed.assessment || JSON.stringify(parsed), spoken: parsed.spoken || '' };
+      } catch (e) {
+        // fallback: return raw text as assessment and a truncated spoken
+        const assessment = raw.split('\n').slice(0, 6).join('\n');
+        const spoken = raw.replace(/\n+/g, ' ').trim().slice(0, 800);
+        return { assessment, spoken };
+      }
+    } catch (err) {
+      console.error('generateStressAssessment error:', err?.message || err);
+      return { assessment: 'Unable to generate AI assessment at this time.', spoken: 'Unable to generate assessment.' };
+    }
+  }
 };
