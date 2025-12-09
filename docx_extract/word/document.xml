@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+<w:body>
+    <w:bookmarkStart w:id="20" w:name="X101ecfcdbf18245a455f197779234f5f8503dd8" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">Mind Mate — Project Starter Specification for GitHub Copilot</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">This document is designed so you can paste it into VS Code and let</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">GitHub Copilot</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">generate the full project for you. It includes:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Full project definition</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Functional requirements</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Non-functional requirements</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- File/folder structure</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Backend (Node.js) expectations</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Frontend (React) expectations</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Component descriptions</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- API specifications</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Styling theme</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Sample prompts for Copilot to expand</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Additional tasks Copilot should complete</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Paste this entire document into your VS Code workspace as</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">PROJECT_STARTER.md</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">or similar. Copilot will understand the architecture and begin scaffolding files as you start creating them.</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="20" />
+    <w:bookmarkStart w:id="21" w:name="project-overview" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">1. PROJECT OVERVIEW</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Mind Mate</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">is an AI-powered wellness companion for workplace mood tracking, stress detection, wellness nudges, and empathetic conversational support.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">This project consists of:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- A</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Node.js (Express)</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">backend</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- A</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">React frontend</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- A minimal LLM integration (OpenAI)</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- A simple JSON-file data store (for hackathon simplicity)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">The end goal is to have a working prototype where:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Users submit mood logs</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- They chat with an empathetic AI</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Stress patterns are detected</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Mood trends are visualized</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- Wellness summaries are generated</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- A breathing animation is accessible</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="21" />
+    <w:bookmarkStart w:id="23" w:name="high-level-requirements" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">2. HIGH-LEVEL REQUIREMENTS</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="22" w:name="functional-requirements" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Functional Requirements</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Mood Logging</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">User selects an emoji (😀 🙂 😐 😟 😢) and a stress level (0–5).</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Data is stored in</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">backend/src/data/data.json</w:t></w:r><w:r><w:t xml:space="preserve">.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Backend returns last 10 entries.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Empathetic Chat</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">User sends a message.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Backend calls LLM wrapper → responds with &lt;70 word supportive response.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Stress Detection</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">If 2 of last 3 stress entries ≥4 → trigger.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">If mood drops ≥2 points across last 4 entries → trigger.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Wellness Summary</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">User requests summary.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Backend compiles last 12 entries.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">LLM produces 4-part summary.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Mood Trend Chart</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Use Chart.js in React.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Display last 10 entries.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Breathing Animation</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="1" /><w:numId w:val="1007" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">A page/component contains the animated breathing exercise.</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="22" />
+    <w:bookmarkEnd w:id="23" />
+    <w:bookmarkStart w:id="24" w:name="non-functional-requirements" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">3. NON-FUNCTIONAL REQUIREMENTS</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Keep code simple and readable.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">No database required — JSON file storage only.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">UI must be calming and minimalistic.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Empathy-focused tone.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">No medical or diagnostic language.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Responses deterministic for demo.</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="24" />
+    <w:bookmarkStart w:id="25" w:name="recommended-folder-structure" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">4. RECOMMENDED FOLDER STRUCTURE</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">mind-mate/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">├── PROJECT_STARTER.md</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">├── backend/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│   ├── package.json</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│   ├── .env</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│   └── src/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── server.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── routes/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── mood.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── chat.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   └── summary.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── services/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── llm.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   └── stressDetector.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── data/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   └── data.json</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       └── utils/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">├── frontend/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│   ├── package.json</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│   └── src/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── App.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── index.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       ├── components/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── ChatPanel.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── MoodInput.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── TrendChart.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── SummaryPanel.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   ├── Avatar.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       │   └── BreathingExercise.jsx</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">│       └── styles/main.css</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">└── demo-assets/</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">    └── breathing-animation.html</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="25" />
+    <w:bookmarkStart w:id="34" w:name="backend-specification-node.js-express" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">5. BACKEND SPECIFICATION (Node.js + Express)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Copilot should generate the following files using these definitions.</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="26" w:name="server.js" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">server.js</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1009" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Initialize Express</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1009" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">CORS enabled</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1009" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Load routes:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">/mood</w:t></w:r><w:r><w:t xml:space="preserve">,</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">/chat</w:t></w:r><w:r><w:t xml:space="preserve">,</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">/summary</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1009" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">JSON parser</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1009" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Port 4000</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="26" />
+    <w:bookmarkStart w:id="30" w:name="routes" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Routes</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="27" w:name="post-mood" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">POST /mood</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1010" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Input:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">{ mood: number, stress: number }</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1010" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Append entry to JSON file</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1010" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Run stress detection</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1010" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Return detection + last 10 entries</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="27" />
+    <w:bookmarkStart w:id="28" w:name="post-chat" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">POST /chat</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1011" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Input:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">{ message: string }</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1011" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Uses OpenAI wrapper to generate empathetic response</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="28" />
+    <w:bookmarkStart w:id="29" w:name="get-summary" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">GET /summary</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1012" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Compiles last 12 entries</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1012" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Passes into summary LLM prompt</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="29" />
+    <w:bookmarkEnd w:id="30" />
+    <w:bookmarkStart w:id="33" w:name="services" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Services</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="31" w:name="stressdetector.js" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">stressDetector.js</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Rules:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- If 2 of last 3 entries have stress ≥4 → trigger</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">- If mood drops ≥2 over last 4 entries → trigger</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="31" />
+    <w:bookmarkStart w:id="32" w:name="llm.js" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">llm.js</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Methods:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">-</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">generateChatReply(message)</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">→ empathetic &lt;70 words</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">-</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">generateSummary(trendValues)</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">→ 4-part summary</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="32" />
+    <w:bookmarkEnd w:id="33" />
+    <w:bookmarkEnd w:id="34" />
+    <w:bookmarkStart w:id="43" w:name="frontend-specification-react" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">6. FRONTEND SPECIFICATION (React)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Copilot should scaffold the components using these instructions.</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="35" w:name="app.jsx-behavior" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">App.jsx behavior</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1013" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Layout: Left column (mood input + activity), center (chat), right (trend chart)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1013" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">State hooks for chat history, mood entries, summary data</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="35" />
+    <w:bookmarkStart w:id="42" w:name="components" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Components</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="36" w:name="chatpanel.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">ChatPanel.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1014" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Chat history list</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1014" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Input box</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1014" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Sends POST</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">/chat</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1014" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Shows response bubbles</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="36" />
+    <w:bookmarkStart w:id="37" w:name="moodinput.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">MoodInput.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1015" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Emoji selection</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1015" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Stress slider</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1015" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">POST</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">/mood</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="37" />
+    <w:bookmarkStart w:id="38" w:name="trendchart.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">TrendChart.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1016" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Line graph using Chart.js</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1016" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">X-axis: timestamps</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1016" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Y-axis: mood scores</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="38" />
+    <w:bookmarkStart w:id="39" w:name="summarypanel.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">SummaryPanel.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1017" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Shows summary text when user requests it</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="39" />
+    <w:bookmarkStart w:id="40" w:name="breathingexercise.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">BreathingExercise.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1018" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Uses the CSS animation from demo-assets</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="40" />
+    <w:bookmarkStart w:id="41" w:name="avatar.jsx" />
+    <w:p><w:pPr><w:pStyle w:val="Heading3" /></w:pPr><w:r><w:t xml:space="preserve">Avatar.jsx</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1019" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Displays small friendly face icon</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="41" />
+    <w:bookmarkEnd w:id="42" />
+    <w:bookmarkEnd w:id="43" />
+    <w:bookmarkStart w:id="47" w:name="styling-guidelines" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">7. STYLING GUIDELINES</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="44" w:name="colors" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Colors</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1020" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Primary Blue:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">#6FA8F1</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1020" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Teal:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">#4FD1C5</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1020" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Lavender:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">#C6B9FF</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1020" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Background Beige:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">#FBFBF9</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1020" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Gray Text:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">#586069</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="44" />
+    <w:bookmarkStart w:id="45" w:name="fonts" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Fonts</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1021" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Inter (body)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1021" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Poppins (headers)</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="45" />
+    <w:bookmarkStart w:id="46" w:name="css-notes" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">CSS Notes</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1022" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Soft shadows:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">0 4px 12px rgba(0,0,0,0.08)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1022" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Rounded corners:</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">border-radius: 12px</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1022" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Use light gradients for cards</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="46" />
+    <w:bookmarkEnd w:id="47" />
+    <w:bookmarkStart w:id="48" w:name="breathing-animation-htmlcss" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">8. BREATHING ANIMATION (HTML/CSS)</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Copilot should generate a React version of this.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">&lt;div class=&quot;circle&quot;&gt;Breathe&lt;/div&gt;</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">CSS:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">.circle {</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  animation: breathe 6s ease-in-out infinite;</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  width: 120px;</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  height: 120px;</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  border-radius: 50%;</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  background: #6FA8F1;</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">}</w:t></w:r><w:r><w:br /></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">@keyframes breathe {</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  0% { transform: scale(0.85); opacity: .8 }</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  50% { transform: scale(1.15); opacity: 1 }</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">  100% { transform: scale(0.85); opacity: .8 }</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">}</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="48" />
+    <w:bookmarkStart w:id="53" w:name="copilot-generation-prompts" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">9. COPILOT GENERATION PROMPTS</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Paste these into VS Code alongside components to prompt Copilot effectively.</w:t></w:r></w:p>
+    <w:bookmarkStart w:id="49" w:name="prompt-generate-backend-route" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Prompt: Generate Backend Route</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Copilot: create an Express route for POST /mood that:</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - Reads data.json</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - Appends new mood entry</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - Runs detectStress()</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - Returns entries and detection</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="49" />
+    <w:bookmarkStart w:id="50" w:name="prompt-generate-empathetic-chat-handler" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Prompt: Generate Empathetic Chat Handler</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Copilot: create a function generateChatReply(message) using OpenAI.</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Tone: gentle, empathetic, non-medical. Under 70 words.</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="50" />
+    <w:bookmarkStart w:id="51" w:name="prompt-generate-react-chat-component" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Prompt: Generate React Chat Component</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Copilot: build ChatPanel.jsx with:</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - chat bubbles</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - text input</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - POST /chat on send</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// - auto-scroll to bottom</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="51" />
+    <w:bookmarkStart w:id="52" w:name="prompt-generate-trend-chart" />
+    <w:p><w:pPr><w:pStyle w:val="Heading2" /></w:pPr><w:r><w:t xml:space="preserve">Prompt: Generate Trend Chart</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="SourceCode" /></w:pPr><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Copilot: create TrendChart.jsx using Chart.js</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Input: mood entries array</w:t></w:r><w:r><w:br /></w:r><w:r><w:rPr><w:rStyle w:val="VerbatimChar" /></w:rPr><w:t xml:space="preserve">// Output: line graph: timestamp vs mood</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="52" />
+    <w:bookmarkEnd w:id="53" />
+    <w:bookmarkStart w:id="54" w:name="next-steps-for-copilot" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">10. NEXT STEPS FOR COPILOT</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1023" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Generate React pages based on wireframes</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1023" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Generate CSS modules from style guide</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1023" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Scaffold backend files from folder structure</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1023" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Add placeholder responses if OpenAI key missing</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1023" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Add mock data to improve demo stability</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:bookmarkEnd w:id="54" />
+    <w:bookmarkStart w:id="55" w:name="final-notes-for-copilot" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">11. FINAL NOTES FOR COPILOT</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1024" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Keep everything minimal and hackathon-ready</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1024" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Quick iteration &gt; perfection</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1024" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Prioritize working demo path</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1024" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">UI clarity and emotional tone are more important than features</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">This is the complete Job Spec for</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">Copilot</w:t></w:r><w:r><w:t xml:space="preserve">.</w:t></w:r><w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t xml:space="preserve">Begin creating files according to the folder structure and follow behavior described above.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:rPr><w:b /><w:bCs /></w:rPr><w:t xml:space="preserve">End of Project Starter Document</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="55" />
+    <w:sectPr>
+      <w:footnotePr>
+        
+                
+        <w:numRestart w:val="eachSect" />
+        
+              
+      </w:footnotePr>
+    </w:sectPr>
+  </w:body>
+</w:document>
