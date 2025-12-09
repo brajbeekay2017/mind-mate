@@ -17,6 +17,8 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   const [moodFeeling, setMoodFeeling] = useState('neutral');
   const [dashboardData, setDashboardData] = useState(null);
   const [lastCompletedChallenge, setLastCompletedChallenge] = useState(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [aiMotivation, setAiMotivation] = useState('');
 
   useEffect(()=>{
     const fetchMoodHistory = async () => {
@@ -47,6 +49,16 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         console.error('Error fetching active challenges:', e);
       }
     };
+   
+     // Check localStorage first for quick restore
+     const cached = localStorage.getItem(`activeChallenge_${userId}`);
+     if (cached) {
+       try {
+         setActiveChallenge(JSON.parse(cached));
+       } catch (err) {
+         console.error('Failed to parse cached challenge:', err);
+       }
+     }
     
     const fetchHistory = async () => {
       try {
@@ -72,6 +84,12 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         const data = await res.json();
         if (data.active && data.active.length > 0) setActiveChallenge(data.active[0]);
         else setActiveChallenge(null);
+         // Save to localStorage for persistence
+         if (data.active && data.active.length > 0) {
+           localStorage.setItem(`activeChallenge_${userId}`, JSON.stringify(data.active[0]));
+         } else {
+           localStorage.removeItem(`activeChallenge_${userId}`);
+         }
       }
       const h = await fetch(`http://localhost:4000/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
       if (h.ok) {
@@ -146,6 +164,10 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
       const data = await res.json();
       // Refresh active challenge list from backend to get canonical data
       await refreshActiveChallenges();
+       // Save to localStorage immediately
+       if (data && data.id) {
+         localStorage.setItem(`activeChallenge_${userId}`, JSON.stringify(data));
+       }
       setTaskProgress({});
     } catch (e) {
       console.error('Start challenge error:', e);
@@ -195,6 +217,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
           console.error('Failed to fetch completed challenge:', e);
         }
         setActiveChallenge(null);
+        localStorage.removeItem(`activeChallenge_${userId}`);
       }
       // Show mood input modal after completing a day
       setCompletedDayNumber(dayNumber);
@@ -258,10 +281,58 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         body: JSON.stringify({ userId, challengeId: activeChallenge.id })
       });
       setActiveChallenge(null);
+      localStorage.removeItem(`activeChallenge_${userId}`);
+      setShowDiscardConfirm(false);
     } catch (e) {
       console.error('Complete challenge error:', e);
     }
   }
+
+  async function discardChallenge() {
+    if(!activeChallenge) return;
+    try {
+      await fetch('http://localhost:4000/stress-recovery/discard', {
+        method: 'POST', 
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userId, challengeId: activeChallenge.id })
+      });
+      setActiveChallenge(null);
+      setShowDiscardConfirm(false);
+       localStorage.removeItem(`activeChallenge_${userId}`);
+      await refreshActiveChallenges();
+    } catch (e) {
+      console.error('Discard challenge error:', e);
+    }
+  }
+
+  // Generate AI motivation message based on progress
+  const generateMotivation = (progress) => {
+    const messages = {
+      low: [
+        "🌟 Great start! Every step counts. Keep going!",
+        "💪 You're doing amazing! Day 1 sets the tone.",
+        "🎯 Focus on today. The rest will follow.",
+      ],
+      mid: [
+        "🚀 Halfway there! You're building great momentum.",
+        "💯 Look at you go! Keep this energy up.",
+        "🌱 Growth happens when we stay consistent.",
+      ],
+      high: [
+        "🏆 You're so close! The finish line awaits!",
+        "⭐ Incredible progress! Final push coming up.",
+        "🎉 You're crushing it! Almost there!",
+      ]
+    };
+    
+    if (progress < 40) {
+      return messages.low[Math.floor(Math.random() * messages.low.length)];
+    } else if (progress < 80) {
+      return messages.mid[Math.floor(Math.random() * messages.mid.length)];
+    } else {
+      return messages.high[Math.floor(Math.random() * messages.high.length)];
+    }
+  };
 
   const getDifficultyColor = (difficulty) => {
     switch(difficulty?.toLowerCase()){
@@ -288,30 +359,39 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
       
       {/* Active Challenge Banner */}
       {activeChallenge && (
-        <div style={{background:'#e8f5e9', border:'2px solid #4CAF50', padding:12, borderRadius:8, marginBottom:12}}>
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10}}>
+        <div style={{background:'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)', border:'2px solid #4CAF50', padding:16, borderRadius:8, marginBottom:12}}>
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12}}>
             <div>
-              <strong style={{color:'#2e7d32'}}>🚀 Active Challenge: {activeChallenge.name}</strong>
+              <strong style={{color:'#2e7d32', fontSize:16}}>🚀 Active Challenge: {activeChallenge.name}</strong>
               <p style={{margin:'4px 0 0 0', fontSize:12, color:'#666'}}>Started: {activeChallenge.startTime ? new Date(activeChallenge.startTime).toLocaleString() : 'Today'}</p>
             </div>
-            <button 
-              onClick={completeChallenge}
-              style={{padding:'6px 12px', background:'#4CAF50', color:'#fff', border:'none', borderRadius:4, cursor:'pointer', fontSize:12}}
-            >
-              ✓ Complete Challenge
-            </button>
+            <div style={{display:'flex', gap:8}}>
+              <button 
+                onClick={() => {
+                  setShowDiscardConfirm(true);
+                }}
+                style={{padding:'6px 12px', background:'#ff6b6b', color:'#fff', border:'none', borderRadius:4, cursor:'pointer', fontSize:12}}
+              >
+                ✕ Discard
+              </button>
+            </div>
+          </div>
+          
+          {/* AI Motivation */}
+          <div style={{background:'rgba(255,255,255,0.8)', padding:10, borderRadius:6, marginBottom:12, fontSize:13, color:'#2e7d32', fontWeight:'600', textAlign:'center', borderLeft:'4px solid #4CAF50'}}>
+            {generateMotivation(getCompletionPercentage())}
           </div>
           
           {/* Progress Bar */}
-          <div style={{background:'#fff', borderRadius:6, padding:10}}>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6}}>
+          <div style={{background:'#fff', borderRadius:6, padding:12}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
               <span style={{fontSize:12, fontWeight:600, color:'#2e7d32'}}>Challenge Progress</span>
-              <span style={{fontSize:14, fontWeight:700, color:'#4CAF50'}}>{getCompletionPercentage()}%</span>
+              <span style={{fontSize:16, fontWeight:700, color:'#4CAF50'}}>{getCompletionPercentage()}%</span>
             </div>
-            <div style={{height:8, background:'#e0f2f1', borderRadius:4, overflow:'hidden'}}>
+            <div style={{height:10, background:'#e0f2f1', borderRadius:4, overflow:'hidden'}}>
               <div style={{height:'100%', width:`${getCompletionPercentage()}%`, background:'linear-gradient(90deg, #4CAF50 0%, #4FD1C5 100%)', transition:'width 0.3s ease'}}></div>
             </div>
-            <p style={{fontSize:11, color:'#666', margin:'6px 0 0 0'}}>
+            <p style={{fontSize:11, color:'#666', margin:'8px 0 0 0', textAlign:'center'}}>
               {activeChallenge.days?.filter(d => d.completed).length || 0} of {activeChallenge.days?.length || 0} days completed
             </p>
           </div>
@@ -378,25 +458,34 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
           {/* Days Accordion */}
           {challenge.days && (
             <div style={{marginBottom:12}}>
-              {challenge.days.map((day, i) => (
-                <div key={i} style={{marginBottom:8, border:'1px solid #e0e0e0', borderRadius:6, overflow:'hidden'}}>
+              {challenge.days.map((day, i) => {
+                const isCurrentDay = activeChallenge && !day.completed && activeChallenge.days?.findIndex(d => !d.completed) === i;
+                const isDone = day.completed;
+                
+                return (
+                <div key={i} style={{marginBottom:8, border: isCurrentDay ? '2px solid #4CAF50' : '1px solid #e0e0e0', borderRadius:6, overflow:'hidden', background: isDone ? '#f0f5f0' : 'white'}}>
                   <button
                     onClick={() => setExpandedDay(expandedDay === i ? null : i)}
                     style={{
                       width:'100%',
                       padding:12,
-                      background: expandedDay === i ? '#f0f8ff' : '#fff',
+                      background: expandedDay === i ? '#f0f8ff' : (isCurrentDay ? '#f0f5f0' : '#fff'),
                       border:'none',
                       textAlign:'left',
                       cursor:'pointer',
                       display:'flex',
                       justifyContent:'space-between',
                       alignItems:'center',
-                      borderBottom: expandedDay === i ? '1px solid #e0e0e0' : 'none'
+                      borderBottom: expandedDay === i ? '1px solid #e0e0e0' : 'none',
+                      position:'relative'
                     }}
                   >
-                    <div>
-                      <div style={{fontWeight:600, fontSize:14}}>Day {day.day}: {day.theme}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:600, fontSize:14, display:'flex', alignItems:'center', gap:8}}>
+                        <span>{isDone ? '✅' : isCurrentDay ? '🎯' : '📌'}</span>
+                        <span>Day {day.day}: {day.theme}</span>
+                        {isCurrentDay && <span style={{background:'#4CAF50', color:'#fff', padding:'2px 6px', borderRadius:3, fontSize:10, fontWeight:700}}>CURRENT</span>}
+                      </div>
                       {day.tagline && <div style={{fontSize:12, color:'#666', marginTop:2}}>{day.tagline}</div>}
                       {day.objective && <div style={{fontSize:12, color:'#4FD1C5', marginTop:2}}>{day.objective}</div>}
                     </div>
@@ -406,7 +495,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
                   {expandedDay === i && (
                     <div style={{padding:12, background:'#fafafa', borderTop:'1px solid #e0e0e0'}}>
                       {day.tasks && day.tasks.map((task, ti) => (
-                        <div key={ti} style={{marginBottom:10, background:'#fff', padding:10, borderRadius:4, borderLeft:'3px solid #4FD1C5'}}>
+                        <div key={ti} style={{marginBottom:10, background:'#fff', padding:10, borderRadius:4, borderLeft: taskProgress[`${day.day}-${task.name}`] ? '3px solid #4CAF50' : '3px solid #4FD1C5', opacity: taskProgress[`${day.day}-${task.name}`] ? 0.6 : 1}}>
                           <button
                             onClick={() => setExpandedTask(expandedTask === `${i}-${ti}` ? null : `${i}-${ti}`)}
                             style={{
@@ -422,7 +511,10 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
                             }}
                           >
                             <div>
-                              <div style={{fontWeight:600, fontSize:13}}>{task.name}</div>
+                              <div style={{fontWeight:600, fontSize:13, display:'flex', alignItems:'center', gap:6}}>
+                                {taskProgress[`${day.day}-${task.name}`] ? '✓' : '○'}
+                                {task.name}
+                              </div>
                               <div style={{fontSize:11, color:'#666', marginTop:2}}>
                                 ⏱ {task.duration} | Impact: {task.impact}
                               </div>
@@ -497,7 +589,8 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
                     </div>
                   )}
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
 
@@ -565,6 +658,40 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         ))}
         {events.length === 0 && <div style={{color:'#999', fontSize:12}}>No events yet</div>}
       </div>
+
+      {/* Discard Confirmation Modal */}
+      {showDiscardConfirm && (
+        <div style={{
+          position:'fixed', top:0, left:0, width:'100%', height:'100%',
+          background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:9998
+        }}>
+          <div style={{
+            background:'#fff', padding:24, borderRadius:12, maxWidth:450, boxShadow:'0 4px 20px rgba(0,0,0,0.15)',
+            textAlign:'center'
+          }}>
+            <h3 style={{margin:'0 0 8px 0', color:'#333'}}>Discard Challenge? ⚠️</h3>
+            <p style={{color:'#666', fontSize:14, marginBottom:16, margin:'8px 0 16px 0'}}>
+              You've completed <strong>{getCompletionPercentage()}%</strong> of this challenge. If you discard it now, your progress will be lost.
+            </p>
+            <p style={{color:'#999', fontSize:12, marginBottom:16}}>You can always generate a new challenge anytime.</p>
+            
+            <div style={{display:'flex', gap:10}}>
+              <button 
+                onClick={() => setShowDiscardConfirm(false)}
+                style={{flex:1, padding:'12px', background:'#eee', border:'none', borderRadius:4, cursor:'pointer', fontSize:13, fontWeight:600}}
+              >
+                Keep Challenge
+              </button>
+              <button 
+                onClick={discardChallenge}
+                style={{flex:1, padding:'12px', background:'#ff6b6b', color:'#fff', border:'none', borderRadius:4, cursor:'pointer', fontSize:13, fontWeight:600}}
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mood Input Modal */}
       {showMoodModal && (
