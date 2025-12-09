@@ -245,6 +245,110 @@
       "context": "challenge-completion",
       "dayCompleted": 3,
       "timestamp": "2025-12-05T16:50:45.651Z"
+    },
+    {
+      "mood": 3,
+      "stress": 3,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-09T12:06:39.326Z"
+    },
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-09T12:06:40.848Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-09T12:34:31.287Z"
+    },
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-09T13:05:10.022Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "calm",
+      "context": "challenge-completion",
+      "dayCompleted": 1,
+      "timestamp": "2025-12-09T13:16:39.477Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "stressed",
+      "context": "challenge-completion",
+      "dayCompleted": 2,
+      "timestamp": "2025-12-09T13:17:06.006Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "challenge-completion",
+      "dayCompleted": 3,
+      "timestamp": "2025-12-09T13:17:16.882Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "calm",
+      "context": "challenge-completion",
+      "dayCompleted": 1,
+      "timestamp": "2025-12-09T13:24:38.037Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "challenge-completion",
+      "dayCompleted": 2,
+      "timestamp": "2025-12-09T13:24:45.667Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "challenge-completion",
+      "dayCompleted": 3,
+      "timestamp": "2025-12-09T13:29:37.019Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "challenge-completion",
+      "dayCompleted": 1,
+      "timestamp": "2025-12-09T13:30:17.069Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "calm",
+      "context": "challenge-completion",
+      "dayCompleted": 2,
+      "timestamp": "2025-12-09T13:30:21.951Z"
+    },
+    {
+      "mood": 3,
+      "stress": 2,
+      "feeling": "tired",
+      "context": "challenge-completion",
+      "dayCompleted": 3,
+      "timestamp": "2025-12-09T13:30:28.706Z"
     }
   ],
   "user": [
@@ -715,6 +819,162 @@
         "dailyProgress": {},
         "generatedBy": "AI",
         "completedTime": 1764953441610
+      },
+      {
+        "id": "1765286188316",
+        "name": "Calm Resilience Challenge",
+        "startTime": 1765286188317,
+        "status": "completed",
+        "days": [
+          {
+            "day": 1,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "4-7-8 Breathing",
+                "completed": false
+              },
+              {
+                "name": "Desk Stretch",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286195848
+          },
+          {
+            "day": 2,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Gratitude Journaling",
+                "completed": false
+              },
+              {
+                "name": "Connect with Colleagues",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286222898
+          },
+          {
+            "day": 3,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Power Nap",
+                "completed": false
+              },
+              {
+                "name": "Progressive Muscle Relaxation",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286235642
+          }
+        ],
+        "dailyProgress": {},
+        "generatedBy": "AI",
+        "completedTime": 1765286235642
+      },
+      {
+        "id": "1765286259915",
+        "name": "From Stress to Calm: A Personalized Recovery",
+        "startTime": 1765286259915,
+        "status": "completed",
+        "days": [
+          {
+            "day": 1,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "4-7-8 Breathing",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286675148
+          },
+          {
+            "day": 2,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Emotional Release Exercise",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286684273
+          },
+          {
+            "day": 3,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Mindfulness and Stretching",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765286975125
+          }
+        ],
+        "dailyProgress": {},
+        "generatedBy": "AI",
+        "completedTime": 1765286975125
+      },
+      {
+        "id": "1765287012009",
+        "name": "Regain Balance and Focus",
+        "startTime": 1765287012009,
+        "status": "completed",
+        "days": [
+          {
+            "day": 1,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "4-7-8 Breathing",
+                "completed": false
+              },
+              {
+                "name": "Body Scan",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765287015654
+          },
+          {
+            "day": 2,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Desk Stretch",
+                "completed": false
+              },
+              {
+                "name": "Mindful Walking",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765287019440
+          },
+          {
+            "day": 3,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "Gratitude Journaling",
+                "completed": false
+              },
+              {
+                "name": "Social Connection",
+                "completed": false
+              }
+            ],
+            "completedTime": 1765287025654
+          }
+        ],
+        "dailyProgress": {},
+        "generatedBy": "AI",
+        "completedTime": 1765287025654
       }
     ]
   },
@@ -740,6 +1000,27 @@
           "name": "Calm Rise, Balanced Sway",
           "completedDate": "2025-12-05T16:50:41.611Z",
           "completedTime": 1764953441611,
+          "daysCompleted": 3
+        },
+        {
+          "challengeId": "1765286188316",
+          "name": "Calm Resilience Challenge",
+          "completedDate": "2025-12-09T13:17:15.642Z",
+          "completedTime": 1765286235642,
+          "daysCompleted": 3
+        },
+        {
+          "challengeId": "1765286259915",
+          "name": "From Stress to Calm: A Personalized Recovery",
+          "completedDate": "2025-12-09T13:29:35.126Z",
+          "completedTime": 1765286975126,
+          "daysCompleted": 3
+        },
+        {
+          "challengeId": "1765287012009",
+          "name": "Regain Balance and Focus",
+          "completedDate": "2025-12-09T13:30:25.654Z",
+          "completedTime": 1765287025654,
           "daysCompleted": 3
         }
       ],
@@ -775,6 +1056,110 @@
           "context": "challenge-completion",
           "dayCompleted": 3,
           "timestamp": "2025-12-05T16:50:45.651Z"
+        },
+        {
+          "mood": 3,
+          "stress": 3,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-09T12:06:39.326Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-09T12:06:40.848Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-09T12:34:31.287Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-09T13:05:10.022Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "calm",
+          "context": "challenge-completion",
+          "dayCompleted": 1,
+          "timestamp": "2025-12-09T13:16:39.477Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "stressed",
+          "context": "challenge-completion",
+          "dayCompleted": 2,
+          "timestamp": "2025-12-09T13:17:06.006Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "challenge-completion",
+          "dayCompleted": 3,
+          "timestamp": "2025-12-09T13:17:16.882Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "calm",
+          "context": "challenge-completion",
+          "dayCompleted": 1,
+          "timestamp": "2025-12-09T13:24:38.037Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "challenge-completion",
+          "dayCompleted": 2,
+          "timestamp": "2025-12-09T13:24:45.667Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "challenge-completion",
+          "dayCompleted": 3,
+          "timestamp": "2025-12-09T13:29:37.019Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "challenge-completion",
+          "dayCompleted": 1,
+          "timestamp": "2025-12-09T13:30:17.069Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "calm",
+          "context": "challenge-completion",
+          "dayCompleted": 2,
+          "timestamp": "2025-12-09T13:30:21.951Z"
+        },
+        {
+          "mood": 3,
+          "stress": 2,
+          "feeling": "tired",
+          "context": "challenge-completion",
+          "dayCompleted": 3,
+          "timestamp": "2025-12-09T13:30:28.706Z"
         }
       ]
     }

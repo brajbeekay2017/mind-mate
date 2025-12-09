@@ -84,8 +84,12 @@ router.post('/generate', async (req, res) => {
 - Active minutes: ${context.googleFitData.activeMinutes}`;
     }
     
-    const recommendations = await generateSmartRecommendations(userId, moodHistory, contextStr, context);
-    res.json({ recommendations });
+    const mode = req.body.mode || 'full';
+    const recommendations = await generateSmartRecommendations(userId, moodHistory, contextStr, context, { mode });
+    // Ensure response is structured and include generatedAt
+    const out = (recommendations && typeof recommendations === 'object') ? recommendations : { summary: String(recommendations) };
+    if (!out.generatedAt) out.generatedAt = new Date().toISOString();
+    res.json(out);
   } catch (e) {
     res.status(500).json({ error: e.message || 'Failed to generate recommendations' });
   }

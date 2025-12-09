@@ -1,6 +1,6 @@
 const llm = require('./llm');
 
-async function generateSmartRecommendations(userId, moodData = [], contextInfo = '', fullContext = {}) {
+async function generateSmartRecommendations(userId, moodData = [], contextInfo = '', fullContext = {}, opts = {}) {
   // Comprehensive fallback recommendations with more variety and detail
   const fallback = {
     recommendations: [
@@ -101,6 +101,21 @@ async function generateSmartRecommendations(userId, moodData = [], contextInfo =
   };
 
   try {
+    // Lightweight mode: return a short AI-like summary and one quick recommendation
+    if (opts.mode === 'lightweight') {
+      const last = moodData[moodData.length - 1];
+      const recentMood = last ? last.mood : null;
+      const quick = {
+        summary: 'Quick coaching: small, immediate actions can help — try a 3–5 minute breathing break and a short walk.',
+        analysis: recentMood !== null ? `Latest mood: ${recentMood}/4 — consider immediate quick wins (breathing, hydration).` : 'No mood entries — try a short breathing pause.',
+        recommendations: [fallback.recommendations[0]],
+        nextSteps: ['Try the breathing reset now', 'Take a 5–10 minute walk']
+      };
+      quick.generatedBy = 'heuristic';
+      quick.basedOnEntries = moodData.length;
+      return quick;
+    }
+
     if (llm && (process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY)) {
       const recentMoods = moodData.slice(-14).map(m => `mood:${m.mood},stress:${m.stress}`).join('; ');
       
@@ -157,6 +172,7 @@ Respond ONLY with valid JSON (no other text):
           const json = JSON.parse(jsonStr);
           console.log('✅ [AI Recommendations] Generated', json.recommendations?.length, 'personalized recommendations');
           json.generatedBy = 'AI';
+            if (!json.generatedAt) json.generatedAt = new Date().toISOString();
           json.basedOnEntries = moodData.length;
           return json;
         } catch (parseErr) {
@@ -168,6 +184,7 @@ Respond ONLY with valid JSON (no other text):
             const json = JSON.parse(jsonStr);
             console.log('✅ [AI Recommendations] Generated (after cleanup)', json.recommendations?.length, 'recommendations');
             json.generatedBy = 'AI';
+              if (!json.generatedAt) json.generatedAt = new Date().toISOString();
             json.basedOnEntries = moodData.length;
             return json;
           } catch (e2) {

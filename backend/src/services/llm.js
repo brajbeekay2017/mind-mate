@@ -186,24 +186,38 @@ async function generateChatReply(message) {
 // ============================================
 // Generate Summary (Groq Primary)
 // ============================================
-async function generateSummary(entries) {
+async function generateSummary(entries, dataContext) {
   const tryProviders = LLM_PROVIDER === 'auto' ? ['groq', 'openai', 'claude'] : [LLM_PROVIDER];
 
-  const promptSystem = `You are a wellness insights analyst. Analyze mood entries and provide a 4-part summary:\n1. Overview (1-2 sentences about overall pattern)\n2. Trends (observable patterns or changes)\n3. Suggestions (practical, brief wellness tips)\n4. Resources (encourage use of breathing exercise or break)\n\nKeep each section to 1-2 sentences. Be supportive and non-clinical.`;
+  const promptSystem = `You are a wellness insights analyst for a mood & stress tracking app. Analyze mood entries and provide helpful, data-informed insights.\n\nBe specific, supportive, and non-clinical. Use the provided statistics to ground your analysis.`;
 
   const entriesSummary = entries
     .slice(-12)
-    .map((e, i) => `Entry ${i + 1}: Mood ${e.mood}/5, Stress ${e.stress}/5`)
+    .map((e, i) => `Entry ${i + 1}: Mood ${e.mood}/4, Stress ${e.stress}/5`)
     .join('\n');
+  
+  // Build enhanced context with stats
+  let statsContext = '';
+  if (dataContext) {
+    statsContext = `\n\n**Your Stats (last ${dataContext.entriesCount} entries):**
+- Average Mood: ${dataContext.avgMood}/4
+- Average Stress: ${dataContext.avgStress}/5
+- Mood Range: ${dataContext.minMood} to ${dataContext.maxMood}/4
+- Peak Stress: ${dataContext.maxStress}/5
+- Mood Trend: ${dataContext.trendDirection}
+- Mood Distribution: Very Happy: ${dataContext.moodDistribution[4]}, Happy: ${dataContext.moodDistribution[3]}, Neutral: ${dataContext.moodDistribution[2]}, Concerned: ${dataContext.moodDistribution[1]}, Very Sad: ${dataContext.moodDistribution[0]}`;
+  }
+
+  const userPrompt = `Please analyze these mood entries and provide insights:\n\n${entriesSummary}${statsContext}\n\nProvide:\n1. Overview of mood and stress patterns\n2. Observable trends and what may be driving them\n3. Practical wellness suggestions based on the data\n4. Encouragement and next steps`;
 
   async function tryGroqSummary() {
     if (!hasGroq || !groqClient) return null;
     try {
       const response = await groqClient.chat.completions.create({
-        messages: [{ role: 'system', content: promptSystem }, { role: 'user', content: `Please analyze these mood entries:\n\n${entriesSummary}` }],
+        messages: [{ role: 'system', content: promptSystem }, { role: 'user', content: userPrompt }],
         model: GROQ_MODEL,
-        temperature: 0.5,
-        max_tokens: 400,
+        temperature: 0.6,
+        max_tokens: 600,
         top_p: 1,
         stream: false
       });
@@ -220,9 +234,9 @@ async function generateSummary(entries) {
     try {
       const resp = await openaiClient.chat.completions.create({
         model: OPENAI_MODEL,
-        messages: [{ role: 'system', content: promptSystem }, { role: 'user', content: `Please analyze these mood entries:\n\n${entriesSummary}` }],
-        temperature: 0.5,
-        max_tokens: 600
+        messages: [{ role: 'system', content: promptSystem }, { role: 'user', content: userPrompt }],
+        temperature: 0.6,
+        max_tokens: 800
       });
       const summary = resp.choices?.[0]?.message?.content || '';
       return summary.trim();
@@ -242,7 +256,7 @@ async function generateSummary(entries) {
       if (!fetchFn) return null;
       const body = {
         model: process.env.CLAUDE_MODEL || 'claude-4.5-haiku',
-        prompt: `${promptSystem}\n\nPlease analyze these mood entries:\n\n${entriesSummary}`,
+        prompt: `${promptSystem}\n\n${userPrompt}`,
         max_tokens: 800
       };
       const resp = await fetchFn(process.env.CLAUDE_API_URL, {
@@ -267,9 +281,24 @@ async function generateSummary(entries) {
     if (result) return result;
   }
 
-  // Fallback summary
+  // Fallback summary with actual stats
   const count = entries.length;
-  const fallbackSummary = `\nOverview: I reviewed your last ${count} entries and noticed some patterns in your mood and stress levels.\n\nTrends: Overall mood shows gentle fluctuations; stress has occasional spikes. You seem to have good and challenging moments throughout your week.\n\nSuggestions: Try short breathing breaks (2-3 min) during peak stress times. A quick walk or stretch can help reset your mind and energy.\n\nResources: A guided breathing exercise is available in the app. Use it anytime you need to pause and recenter.`;
+  const avgM = dataContext?.avgMood || 2;
+  const avgS = dataContext?.avgStress || 2.5;
+  const trend = dataContext?.trendDirection || 'stable';
+  
+  const fallbackSummary = `## Your Wellness Summary
+
+**Overview:** I reviewed your last ${count} entries. Your average mood is ${avgM}/4 with an average stress level of ${avgS}/5. Your mood trend is currently ${trend}.
+
+**Patterns & Trends:** You're showing a mix of emotional experiences with occasional stress peaks. This is normal and human—what matters is how you respond to it.
+
+**Wellness Suggestions:** 
+- Practice 2-3 minute breathing breaks during stressful moments
+- Take short walks or stretch when stress rises above 4/5
+- Notice what helps you feel better and do more of that
+
+**Next Steps:** Keep logging your mood—patterns become clearer with more data. Try one small wellness action today (breathing, movement, rest). You've got this! 💪`;
 
   return fallbackSummary.trim();
 }

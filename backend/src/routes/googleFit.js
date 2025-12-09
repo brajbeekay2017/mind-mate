@@ -779,4 +779,108 @@ router.get('/data', async (req, res) => {
   }
 });
 
+// GET /google-fit/monthly - Fetch daily steps and heart points for a specific month
+router.get('/monthly', async (req, res) => {
+  const { accessToken, year, month } = req.query;
+  
+  if (!accessToken || !year || !month) {
+    return res.status(400).json({ error: 'accessToken, year, and month are required' });
+  }
+  
+  try {
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+    
+    oauth2Client.setCredentials({ access_token: accessToken });
+    const fitness = google.fitness({ version: 'v1', auth: oauth2Client });
+    
+    // Calculate first and last day of the month
+    const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const lastDay = new Date(parseInt(year), parseInt(month), 0);
+    
+    const startTime = firstDay.getTime();
+    const endTime = lastDay.getTime() + (24 * 60 * 60 * 1000); // Include entire last day
+    
+    const dailyData = {};
+    
+    // Helper to format date as YYYY-MM-DD (local time, not UTC)
+    const formatLocalDateKey = (timestampMs) => {
+      const d = new Date(timestampMs);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    
+    // Fetch steps data
+    const stepsResponse = await fitness.users.dataset.aggregate({
+      userId: 'me',
+      requestBody: {
+        aggregateBy: [{
+          dataTypeName: 'com.google.step_count.delta',
+          dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
+        }],
+        bucketByTime: { durationMillis: 86400000 }, // 1 day
+        startTimeMillis: startTime,
+        endTimeMillis: endTime
+      }
+    });
+    
+    if (stepsResponse.data.bucket) {
+      stepsResponse.data.bucket.forEach(bucket => {
+        const date = formatLocalDateKey(parseInt(bucket.startTimeMillis));
+        const steps = bucket.dataset[0]?.point?.[0]?.value?.[0]?.intVal || 0;
+        
+        if (!dailyData[date]) {
+          dailyData[date] = {};
+        }
+        dailyData[date].steps = steps;
+      });
+    }
+    
+    // Fetch heart points data
+    try {
+      const heartResponse = await fitness.users.dataset.aggregate({
+        userId: 'me',
+        requestBody: {
+          aggregateBy: [{
+            dataTypeName: 'com.google.heart_minutes',
+            dataSourceId: 'derived:com.google.heart_minutes:com.google.android.gms:merged'
+          }],
+          bucketByTime: { durationMillis: 86400000 }, // 1 day
+          startTimeMillis: startTime,
+          endTimeMillis: endTime
+        }
+      });
+      
+      if (heartResponse.data.bucket) {
+        heartResponse.data.bucket.forEach(bucket => {
+          const date = formatLocalDateKey(parseInt(bucket.startTimeMillis));
+          const heartPoints = bucket.dataset[0]?.point?.[0]?.value?.[0]?.fpVal || bucket.dataset[0]?.point?.[0]?.value?.[0]?.intVal || 0;
+          
+          if (!dailyData[date]) {
+            dailyData[date] = {};
+          }
+          dailyData[date].heartPoints = Math.round(heartPoints);
+        });
+      }
+    } catch (heartErr) {
+      console.log('Heart points not available:', heartErr.message);
+    }
+    
+    res.json({
+      success: true,
+      year: parseInt(year),
+      month: parseInt(month),
+      dailyData: dailyData
+    });
+  } catch (err) {
+    console.error('Error fetching monthly data:', err.message);
+    res.status(500).json({ error: err.message || 'Failed to fetch monthly data' });
+  }
+});
+
 module.exports = router;

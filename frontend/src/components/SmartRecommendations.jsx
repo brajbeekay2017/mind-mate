@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-export default function SmartRecommendations({ userId = 'user-1', workContext = 'office', companyRole = 'general' }){
+export default function SmartRecommendations({ userId = 'user-1', workContext: initialWorkContext = 'office', companyRole: initialCompanyRole = 'engineer' }){
   const [recs, setRecs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [moodHistory, setMoodHistory] = useState([]);
   const [googleFitData, setGoogleFitData] = useState(null);
   const [expandedRec, setExpandedRec] = useState(null);
+  const [workContext, setWorkContext] = useState(initialWorkContext);
+  const [companyRole, setCompanyRole] = useState(initialCompanyRole);
+  const [stressorText, setStressorText] = useState('');
+  const [gfConnected, setGfConnected] = useState(!!localStorage.getItem('googlefit_token'));
 
   useEffect(()=>{
     const fetchMoodHistory = async () => {
@@ -21,14 +25,69 @@ export default function SmartRecommendations({ userId = 'user-1', workContext = 
     };
 
     const fetchGoogleFit = async () => {
-      try {
-        const res = await fetch(`http://localhost:4000/google-fit/latest?userId=${encodeURIComponent(userId)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setGoogleFitData(data);
+        try {
+          const token = localStorage.getItem('googlefit_token');
+          if (!token) return;
+
+          // Fetch steps today and heart points in parallel
+          const [stepsRes, heartRes] = await Promise.all([
+            fetch(`http://localhost:4000/google-fit/steps-today?accessToken=${encodeURIComponent(token)}`),
+            fetch(`http://localhost:4000/google-fit/heart-points?accessToken=${encodeURIComponent(token)}&days=1`)
+          ]);
+
+          const gf = {};
+          if (stepsRes.ok) {
+            const s = await stepsRes.json();
+            gf.steps = s?.data?.steps ?? 0;
+          }
+          if (heartRes.ok) {
+            const h = await heartRes.json();
+            gf.heartPoints = h?.data?.heartPoints ?? (h?.data?.heartMinutes || 0) ?? 0;
+          }
+
+          setGoogleFitData(gf);
+          if (gf && (gf.steps || gf.heartPoints)) setGfConnected(true);
+        } catch (e) {
+          console.error('Error fetching Google Fit in recommendations:', e);
         }
-      } catch (e) {
-        // Silently handle
+    };
+
+    // Allow connecting Google Fit from this panel (replicates flow in GoogleFitPanel)
+    const connectToGoogleFit = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/google-auth/auth-url');
+        if (!response.ok) throw new Error('Failed to get authorization URL');
+        const { authUrl } = await response.json();
+        if (!authUrl) throw new Error('No authorization URL');
+
+        const authWindow = window.open(authUrl, 'googleFitAuth', 'width=500,height=600');
+
+        const handleMessage = (event) => {
+          if (event.data?.type === 'GOOGLE_FIT_AUTH') {
+            const { accessToken, error: authError } = event.data;
+            if (authError) {
+              console.error('Google Fit auth error:', authError);
+            } else if (accessToken) {
+              localStorage.setItem('googlefit_token', accessToken);
+              setGfConnected(true);
+              // notify others and refresh local data
+              try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken } })); } catch (e) {}
+              fetchGoogleFit();
+            }
+            window.removeEventListener('message', handleMessage);
+            if (authWindow && !authWindow.closed) authWindow.close();
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        // safety timeout
+        setTimeout(() => {
+          window.removeEventListener('message', handleMessage);
+          if (authWindow && !authWindow.closed) authWindow.close();
+        }, 5 * 60 * 1000);
+      } catch (err) {
+        console.error('Failed to initiate Google Fit connect:', err);
       }
     };
 
@@ -36,7 +95,24 @@ export default function SmartRecommendations({ userId = 'user-1', workContext = 
     fetchGoogleFit();
   }, [userId]);
 
-  async function generate(){
+  // Auto-generate recommendations when data changes (debounced)
+  useEffect(() => {
+    // don't auto-generate until we have at least one mood entry or some googleFitData
+    if ((!moodHistory || moodHistory.length === 0) && !googleFitData) {
+      // still allow lightweight AI advice based on role/context and stressor notes
+      const timerLite = setTimeout(() => {
+        generate({ lightweight: true });
+      }, 1200);
+      return () => clearTimeout(timerLite);
+    }
+    const timer = setTimeout(() => {
+      generate({ lightweight: false });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moodHistory, googleFitData, workContext, companyRole]);
+
+  async function generate(opts = {}){
     setLoading(true);
     try{
       const payload = {
@@ -44,14 +120,24 @@ export default function SmartRecommendations({ userId = 'user-1', workContext = 
         moodHistory: moodHistory || [],
         googleFitData: googleFitData || {},
         workContext: workContext,
-        companyRole: companyRole
+        companyRole: companyRole,
+        stressor: stressorText,
+        counselingTone: true
       };
+      // allow lightweight requests that ask for brief guidance when data is sparse
+      if (opts.lightweight) payload.mode = 'lightweight';
       const res = await fetch('http://localhost:4000/recommendations/generate', {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      setRecs(data.recommendations || data);
+      // prefer structured object, but accept string replies
+      if (data && typeof data === 'object') {
+        // backend may return { summary, recommendations, analysis, generatedAt }
+        setRecs(data);
+      } else {
+        setRecs({ summary: data, recommendations: [] });
+      }
       setExpandedRec(null);
     }catch(e){
       console.error(e);
@@ -83,23 +169,78 @@ export default function SmartRecommendations({ userId = 'user-1', workContext = 
 
   return (
     <div style={{padding:16}}>
-      <h3>Smart Wellness Recommendations (AI-Generated)</h3>
-      <div style={{marginBottom:12, fontSize:'13px', color:'#666'}}>
-        <p>Personalized recommendations based on your mood trends, stress patterns, and activity data</p>
-        {moodHistory.length > 0 && (
-          <p><strong>📊 Mood data:</strong> {moodHistory.length} entries analyzed</p>
-        )}
-        {googleFitData && (
-          <p><strong>📈 Activity data:</strong> {googleFitData.steps || 0} steps, {googleFitData.sleep || 0}h sleep</p>
-        )}
+      <h3>Counselling Panel — Recommendations for Software Employees</h3>
+
+      {!gfConnected && (
+        <div style={{marginTop:8,marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',background:'#fff8f0',border:'1px solid #ffd6a5',padding:10,borderRadius:8}}>
+          <div style={{display:'flex',flexDirection:'column'}}>
+            <div style={{fontSize:13,fontWeight:600,color:'#8a5a00'}}>Connect Google Fit for richer recommendations</div>
+            <div style={{fontSize:12,color:'#7a6248',marginTop:4}}>Steps & Heart Points improve personalization — connect to see activity-based suggestions.</div>
+          </div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <button onClick={connectToGoogleFit} style={{padding:'8px 10px',borderRadius:6,background:'#4FD1C5',color:'#fff',border:'none',cursor:'pointer',fontWeight:600}}>Connect Google Fit</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:8,marginBottom:12}}>
+        <div>
+          <label style={{fontSize:12,color:'#666'}}>Role</label>
+          <select value={companyRole} onChange={e=>setCompanyRole(e.target.value)} style={{width:'100%',padding:8,borderRadius:6,marginTop:6}}>
+            <option value="engineer">Engineer</option>
+            <option value="manager">Manager</option>
+            <option value="designer">Designer</option>
+            <option value="qa">QA</option>
+            <option value="product">Product</option>
+          </select>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'#666'}}>Work Context</label>
+          <select value={workContext} onChange={e=>setWorkContext(e.target.value)} style={{width:'100%',padding:8,borderRadius:6,marginTop:6}}>
+            <option value="office">Office</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
       </div>
-      <button onClick={generate} disabled={loading} style={{padding:'8px 12px',borderRadius:8, background: loading ? '#ccc' : 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)', color:'#fff', border:'none', cursor: loading ? 'not-allowed' : 'pointer'}}>{loading ? 'Analyzing your data...' : 'Generate Recommendations'}</button>
+
+      <div style={{marginBottom:12}}>
+        <label style={{fontSize:12,color:'#666'}}>Current stressors / notes (optional)</label>
+        <input value={stressorText} onChange={e=>setStressorText(e.target.value)} placeholder="e.g. tight deadlines, team conflict, on-call" style={{width:'100%',padding:8,borderRadius:6,marginTop:6}} />
+      </div>
+
+      <div style={{marginBottom:12, fontSize:'13px', color:'#666', display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{flex:1}}>
+          <p>AI-driven counselling suggestions that combine mood trends, stress patterns, and activity signals.</p>
+          <div style={{display:'flex',gap:12,alignItems:'center',fontSize:13}}>
+            <div>📊 <strong>{moodHistory.length}</strong> mood entries</div>
+            <div>📈 <strong>{googleFitData?.steps ?? 0}</strong> steps</div>
+            <div>❤️ <strong>{googleFitData?.heartPoints ?? 0}</strong> HP</div>
+          </div>
+        </div>
+        <div style={{marginLeft:12,display:'flex',alignItems:'center',gap:8}}>
+          <div style={{background:'#eef6ff',color:'#0F4761',padding:'6px 8px',borderRadius:6,fontSize:12,fontWeight:600}}>AI</div>
+          <div style={{fontSize:12,color:'#999'}}>Live</div>
+        </div>
+      </div>
+
+      <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:12}}>
+        <button onClick={generate} disabled={loading} style={{padding:'8px 12px',borderRadius:8, background: loading ? '#ccc' : 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)', color:'#fff', border:'none', cursor: loading ? 'not-allowed' : 'pointer'}}>{loading ? 'Analyzing your data...' : 'Refresh Recommendations'}</button>
+        <div style={{fontSize:12,color:'#999'}}>Last updated: {recs && recs.generatedAt ? new Date(recs.generatedAt).toLocaleString() : '—'}</div>
+      </div>
 
       {recs && (
         <div style={{marginTop:16}}>
           {recs.summary && (
             <div style={{background:'#f0f8ff', padding:12, borderRadius:8, marginBottom:12, fontSize:13, color:'#0066cc', fontStyle:'italic'}}>
               "{recs.summary}"
+            </div>
+          )}
+
+          {recs.analysis && (
+            <div style={{background:'#fff7e6', padding:12, borderRadius:8, marginBottom:12, fontSize:13, color:'#8a5700'}}>
+              <strong style={{display:'block',marginBottom:6}}>AI Analysis</strong>
+              <div style={{fontSize:13,color:'#6b4f00'}}>{recs.analysis}</div>
             </div>
           )}
 
@@ -220,7 +361,7 @@ export default function SmartRecommendations({ userId = 'user-1', workContext = 
       )}
 
       {!recs && (
-        <div style={{color:'#666', marginTop:12}}>No recommendations yet. Click "Generate Recommendations" to get personalized suggestions based on your data.</div>
+        <div style={{color:'#666', marginTop:12}}>No recommendations yet. Recommendations are generated automatically after new mood or activity data is available, or click "Refresh Recommendations" to force an update.</div>
       )}
     </div>
   );

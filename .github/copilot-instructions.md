@@ -48,135 +48,51 @@ Located in `services/llm.js`. **Multi-provider with auto-fallback**:
 **Important**: All responses use markdown formatting (bullet points, bold, tables per `GROQ_SYSTEM_PROMPT`).
 
 ---
+## Mind Mate — Copilot / AI Agent Quick Guide
 
-## Frontend Patterns
+Purpose: short, actionable instructions to get an AI coding agent productive in this repo.
 
-### React Component Structure
-- Use React hooks (useState, useEffect, useRef)
-- Fetch API to `http://localhost:4000/*` endpoints
-- Store user data in localStorage under key `mindmate_user` and `mindmate_entries`
-- Components handle markdown rendering via `react-markdown` library
+- **Top-level architecture**: a Node/Express backend (`backend/`, port 4000) and a Vite + React frontend (`frontend/`, port 5173). Backend uses a single JSON store at `backend/src/data/data.json` (top-level keys = `userId`).
 
-### Key Components & Responsibilities
-- **ChatPanel.jsx**: Chat interface, sends POST `/chat`, streams responses as markdown
-- **MoodInput.jsx**: Emoji mood selector (0-4), stress slider, saves to `/mood`
-- **TrendChart.jsx**: Charts last 10 mood entries using chart.js
-- **StressRecoveryChallenge.jsx**: Generates challenge via `/stress-recovery/generate`, subscribes to SSE for real-time updates
-- **SmartRecommendations.jsx**: Displays LLM recommendations with priority ranking
-- **TeamAlertsPanel.jsx**: Real-time team event feed via SSE `/team-alerts/stream`
+- **Key backend files**: `backend/src/server.js` (route wiring), `backend/src/services/llm.js` (LLM multi-provider + fallbacks), `backend/src/services/stressDetector.js` (alert rules), `backend/src/services/stressRecovery.js`, `backend/src/routes/mood.js`, `backend/src/routes/teamAlerts.js`, `backend/src/routes/stressRecovery.js`.
 
-### UI Conventions
-- Tab-based navigation: Dashboard | Recovery | Recommendations | Alerts
-- Emoji-driven mood input (no numeric scales visible)
-- Markdown content rendered with react-markdown
-- Success alerts with modal/toast pattern
+- **Key frontend files**: `frontend/src/App.jsx`, `frontend/src/components/ChatPanel.jsx`, `MoodInput.jsx`, `StressRecoveryChallenge.jsx`, `TeamAlertsPanel.jsx`, `HistoricCalendar.jsx` (calendar UI). Frontend stores lightweight state in `localStorage` keys `mindmate_user` and `mindmate_entries` and renders LLM markdown with `react-markdown`.
 
----
+- **Data flow & conventions**:
+  - All user-scoped APIs expect a `userId` (query param or body). Missing `userId` yields 401-like errors.
+  - The JSON file is the single source of truth — read/write helpers in routes use `fs-extra`. Concurrent writes can corrupt `data.json`; do not change its top-level shape.
+  - Routes return structured JSON; error responses are `{ error: 'message' }` (no raw exceptions to clients).
 
-## Developer Workflows
+- **LLM behavior** (`backend/src/services/llm.js`): multi-provider with auto-fallback (Groq primary, OpenAI/Claude fallbacks, then deterministic defaults). Functions to call: `generateChatReply()`, `generateSummary()`, `generateRecoveryPlan()` and `getProviderInfo()`.
 
-### Local Development Setup
-```bash
-# Backend
-cd backend
-npm install
-npm run dev        # Runs with nodemon on port 4000
+- **Real-time patterns**: SSE endpoints are used for streaming team alerts and recovery progress (`/team-alerts/stream`, `/stress-recovery/*`). Frontend uses `new EventSource(...)` to subscribe.
 
-# Frontend (separate terminal)
-cd frontend
-npm install
-npm run start      # Vite dev server on port 5173
+- **Stress detection rules**: encoded in `services/stressDetector.js`. Example rules to reference in tests: "2+ of last 3 entries stress >=4" and "mood variance >=2 across last 4 entries".
+
+- **Developer workflows** (copy-paste):
+```powershell
+cd backend; npm install; npm run dev
+cd frontend; npm install; npm run start
+cd backend; npm test
 ```
 
-### Environment Configuration
-Backend uses `.env` file in `backend/` folder (loaded by dotenv):
-```
-GROQ_API_KEY=xxx          # Required for Groq
-OPENAI_API_KEY=xxx        # Optional, for fallback
-GROQ_MODEL=mixtral-8x7b-32768
-OPENAI_MODEL=gpt-4o-mini
-LLM_PROVIDER=auto         # 'auto', 'groq', 'openai', 'claude'
-PORT=4000
-```
+- **Environment**: backend reads `.env` in `backend/` (keys: `GROQ_API_KEY`, `OPENAI_API_KEY`, `GROQ_MODEL`, `OPENAI_MODEL`, `LLM_PROVIDER`, `PORT`). If LLM keys are missing, code falls back to deterministic responses — tests assume this is possible.
 
-### Testing
-- **Unit Tests**: `backend/test/` directory (Jest)
-  - Run: `cd backend && npm test`
-  - Key tests: `integration.mood.test.js` (mood endpoint), `stressDetector.test.js`
-- **Smoke Tests**: PowerShell scripts (`test-smoke.ps1`, `test-smoke-advanced.ps1`)
-  - Test all 3 AI features end-to-end
-  - Verify LLM generation works
-  - Check SSE broadcasts
+- **Testing & smoke scripts**: unit tests live in `backend/test/` (Jest). Smoke scripts at repo root are PowerShell: `test-smoke.ps1`, `test-smoke-advanced.ps1`, `test-smoke-final.ps1` — these exercise LLM and SSE functionality.
 
-### Data Management
-- **Clear User Data**: POST `/mood/clear?userId=X` (frontend calls this with confirmation)
-- **Reset All Data**: Manually delete/truncate `backend/src/data/data.json`
-- **Backup**: Data persists in single JSON file (keep backups before clearing)
-
----
-
-## Project-Specific Conventions
-
-### Error Handling
-- Routes return `{ error: 'message' }` on 4xx errors
-- LLM failures gracefully degrade to fallback deterministic responses
-- No exceptions thrown to client; always return structured JSON responses
-
-### Stress Detection Rules
-From `services/stressDetector.js`:
-- **Rule 1**: If 2+ of last 3 entries have stress ≥4 → triggers alert
-- **Rule 2**: If mood variance ≥2 across last 4 entries → triggers alert
-
-### Database-like Patterns
-- No database; JSON file is single source of truth
-- Read/write operations use `fs-extra` (ensures file/folder creation)
-- All user data is indexed by userId as top-level key
-- **Important**: Concurrent writes may cause data loss; not production-ready without SQLite/PostgreSQL
-
-### Mood/Stress Scales
-- **Mood**: 0-4 (very sad → very happy), typically mapped to emoji
-- **Stress**: 0-5 (relaxed → very stressed), labeled: "Relaxed", "Calm", "Neutral", "Concerned", "Stressed", "Very Stressed"
-
----
-
-## Common Pitfalls & Solutions
-
-| Issue | Prevention |
-|-------|-----------|
-| Missing userId → 401 errors | Always pass userId in query or body |
-| LLM not responding | Check `.env` file exists + API keys set. System auto-fallbacks to deterministic responses |
-| SSE stream not connecting | Frontend must call `new EventSource('/team-alerts/stream')` before events fire |
-| Stale mood data in frontend | Call `setRefreshKey(prev => prev + 1)` to trigger useEffect reload |
-| Data.json corrupted (bad JSON) | Replace with `{}` and re-test. Check file permissions |
-
----
-
-## Quick Command Reference
-
-```bash
-# Development
-cd backend && npm run dev      # Start backend with hot reload
-cd frontend && npm run start   # Start frontend Vite server
-npm test                       # Run Jest tests (from backend/)
-
-# Manual API Testing (PowerShell)
+- **Examples**:
+  - POST mood (PowerShell):
+```powershell
 $body = @{ mood = 3; stress = 2 } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:4000/mood?userId=test" `
-  -Method POST -ContentType "application/json" -Body $body
-
-# Smoke Tests
-.\test-smoke.ps1              # Basic feature test
-.\test-smoke-advanced.ps1     # Full AI integration test
+Invoke-RestMethod -Uri "http://localhost:4000/mood?userId=test" -Method POST -ContentType "application/json" -Body $body
 ```
+  - Subscribe to team alerts (frontend): `new EventSource('/team-alerts/stream')`.
 
----
+- **When adding routes/services**: place route files in `backend/src/routes/` and add to `server.js`. New service modules belong in `backend/src/services/` and should expose focused functions (no side effects); reuse `readData()`/`writeData()` patterns.
 
-## When Extending the Codebase
+- **Important maintenance notes**:
+  - Do not refactor `data.json` layout unless you update all read/write usage and tests.
+  - SSE endpoints assume long-running connections — test with a browser EventSource or PowerShell SSE client when modifying.
+  - LLM provider selection can be forced via `LLM_PROVIDER` env var for debugging.
 
-1. **Adding a new route**: Create file in `backend/src/routes/`, require in `server.js`
-2. **Adding a service**: Create in `backend/src/services/`, export functions
-3. **Using LLM**: Import `llm.js` and call `generateChatReply()` or `generateSummary()`
-4. **Adding frontend tab**: Create component in `frontend/src/components/`, add to App.jsx tabs
-5. **Storing user data**: Use existing `readData()` / `writeData()` pattern in routes (indexed by userId)
-
-**Golden Rule**: Keep userId as first-class citizen throughout the stack (query param → service → storage).
+If anything above is unclear or you'd like me to expand examples (e.g., exact read/write helpers or a short integration test for a new route), say which area and I'll update this file.
