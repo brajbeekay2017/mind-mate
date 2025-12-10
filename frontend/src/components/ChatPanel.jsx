@@ -1,10 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+const QUICK_PROMPTS = [
+  "I'm overwhelmed by this sprint deadline",
+  "How do I handle difficult code reviews?",
+  "Tips for managing on-call stress",
+  "I'm frustrated with technical debt",
+  "How to deal with production incidents?",
+  "Struggling with work-life balance in tech",
+  "Team conflict - how do I navigate it?",
+  "I'm burnt out from long hours",
+  "How to handle imposter syndrome?",
+  "Dealing with scope creep and pressure"
+];
+
 export default function ChatPanel(){
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const endRef = useRef();
   const textareaRef = useRef();
   const messagesContainerRef = useRef();
@@ -37,10 +51,20 @@ export default function ChatPanel(){
     }
   };
 
+  const selectQuickPrompt = (prompt) => {
+    setText(prompt);
+    setShowSuggestions(false);
+    // Focus back on textarea
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   async function send(){
     if(!text.trim() || isLoading) return;
     const msg = text;
     setText('');
+    setShowSuggestions(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
@@ -326,25 +350,92 @@ export default function ChatPanel(){
         <div ref={endRef} style={{flexShrink:0}} />
       </div>
 
-      <div style={{display:'flex',padding:12,borderTop:'1px solid rgba(0,0,0,0.1)',background:'#fff',gap:8,flexShrink:0}}>
-        <textarea 
-          ref={textareaRef}
-          value={text} 
-          onChange={handleTextChange}
-          onKeyDown={handleKeyDown}
-          disabled={isLoading}
-          style={{flex:1,padding:10,borderRadius:10,border:'1px solid #D1E7F0',fontSize:'14px',fontFamily:'Inter, system-ui, sans-serif',resize:'none',minHeight:'40px',maxHeight:'120px',boxShadow:'0 2px 6px rgba(111,168,241,0.1)',opacity: isLoading ? 0.6 : 1,cursor: isLoading ? 'not-allowed' : 'text',overflow:'hidden'}} 
-          placeholder="Say something... (Press Enter to send, Shift+Enter for new line)"
-        />
-        <button 
-          onClick={send}
-          disabled={isLoading || !text.trim()}
-          style={{padding:'10px 16px',borderRadius:10,background: isLoading || !text.trim() ? '#ccc' : 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)',color:'#fff',border:'none',cursor: isLoading || !text.trim() ? 'not-allowed' : 'pointer',fontWeight:'600',boxShadow: isLoading ? 'none' : '0 4px 12px rgba(111,168,241,0.3)',transition:'all 0.3s ease',opacity: isLoading || !text.trim() ? 0.6 : 1,flexShrink:0}}
-          onMouseOver={(e) => !isLoading && text.trim() && (e.target.style.transform = 'translateY(-2px)')}
-          onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-        >
-          {isLoading ? 'Sending...' : 'Send'}
-        </button>
+      <div style={{display:'flex',padding:12,borderTop:'1px solid rgba(0,0,0,0.1)',background:'#fff',gap:8,flexShrink:0,flexDirection:'column'}}>
+        {/* Quick prompts dropdown */}
+        <div style={{position:'relative'}}>
+          <button 
+            onClick={() => setShowSuggestions(!showSuggestions)}
+            style={{
+              width:'100%',
+              padding:'8px 10px',
+              borderRadius:8,
+              border:'1px solid #d0d0d0',
+              background:'#f9f9f9',
+              cursor:'pointer',
+              fontSize:'12px',
+              color:'#666',
+              textAlign:'left',
+              display:'flex',
+              justifyContent:'space-between',
+              alignItems:'center'
+            }}
+          >
+            <span>💬 Quick prompts</span>
+            <span style={{fontSize:'10px'}}>{showSuggestions ? '▲' : '▼'}</span>
+          </button>
+          
+          {showSuggestions && (
+            <div style={{
+              position:'absolute',
+              top:'100%',
+              left:0,
+              right:0,
+              background:'#fff',
+              border:'1px solid #d0d0d0',
+              borderTop:'none',
+              borderRadius:'0 0 8px 8px',
+              maxHeight:'200px',
+              overflow:'auto',
+              zIndex:10,
+              boxShadow:'0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              {QUICK_PROMPTS.map((prompt, i) => (
+                <button
+                  key={i}
+                  onClick={() => selectQuickPrompt(prompt)}
+                  style={{
+                    width:'100%',
+                    padding:'8px 10px',
+                    border:'none',
+                    background:'none',
+                    textAlign:'left',
+                    cursor:'pointer',
+                    fontSize:'12px',
+                    color:'#333',
+                    borderBottom: i < QUICK_PROMPTS.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    transition:'background 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+                  onMouseOut={(e) => e.target.style.background = 'none'}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Text input */}
+        <div style={{display:'flex',gap:8}}>
+          <textarea 
+            ref={textareaRef}
+            value={text} 
+            onChange={handleTextChange}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+            style={{flex:1,padding:10,borderRadius:10,border:'1px solid #D1E7F0',fontSize:'14px',fontFamily:'Inter, system-ui, sans-serif',resize:'none',minHeight:'40px',maxHeight:'120px',boxShadow:'0 2px 6px rgba(111,168,241,0.1)',opacity: isLoading ? 0.6 : 1,cursor: isLoading ? 'not-allowed' : 'text',overflow:'hidden'}} 
+            placeholder="Say something... (Press Enter to send, Shift+Enter for new line)"
+          />
+          <button 
+            onClick={send}
+            disabled={isLoading || !text.trim()}
+            style={{padding:'10px 16px',borderRadius:10,background: isLoading || !text.trim() ? '#ccc' : 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)',color:'#fff',border:'none',cursor: isLoading || !text.trim() ? 'not-allowed' : 'pointer',fontWeight:'600',boxShadow: isLoading ? 'none' : '0 4px 12px rgba(111,168,241,0.3)',transition:'all 0.3s ease',opacity: isLoading || !text.trim() ? 0.6 : 1,flexShrink:0}}
+            onMouseOver={(e) => !isLoading && text.trim() && (e.target.style.transform = 'translateY(-2px)')}
+            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+          >
+            {isLoading ? 'Sending...' : 'Send'}
+          </button>
+        </div>
       </div>
     </div>
   )
