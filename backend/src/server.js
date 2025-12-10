@@ -45,7 +45,7 @@ app.use('/team-alerts', teamAlertsRouter);
 app.use('/recommendations', recommendationsRouter);
 app.use('/alerts', stressAlertsRouter);
 
-// Root handler for health check
+// Root handler for health check and OAuth callback
 app.get('/', (req, res) => {
   // If there's a code query parameter, it's the Google OAuth callback
   if (req.query.code) {
@@ -53,6 +53,16 @@ app.get('/', (req, res) => {
     return res.redirect(`/google-auth/callback?${Object.keys(req.query).map(k => `${k}=${req.query[k]}`).join('&')}`);
   }
   res.json({ message: 'Mind Mate Backend is running' });
+});
+
+// Explicit callback route for Google OAuth
+app.get('/callback', (req, res) => {
+  const { code, state, error } = req.query;
+  if (error) {
+    return res.send(`<html><body><h1>Authorization Error</h1><p>${error}</p></body></html>`);
+  }
+  // Redirect to google-auth callback handler
+  res.redirect(`/google-auth/callback?code=${code}${state ? `&state=${state}` : ''}`);
 });
 
 // 404 handler

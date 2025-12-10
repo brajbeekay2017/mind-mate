@@ -349,6 +349,14 @@
       "context": "challenge-completion",
       "dayCompleted": 3,
       "timestamp": "2025-12-09T13:30:28.706Z"
+    },
+    {
+      "mood": 2,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T15:31:15.281Z"
     }
   ],
   "user": [
@@ -371,6 +379,22 @@
       "mood": 4,
       "stress": 4,
       "timestamp": "2025-12-03T16:00:48.337Z"
+    },
+    {
+      "mood": 4,
+      "stress": 1,
+      "feeling": "stressed",
+      "context": "challenge-completion",
+      "dayCompleted": 1,
+      "timestamp": "2025-12-10T14:57:38.589Z"
+    },
+    {
+      "mood": 4,
+      "stress": 1,
+      "feeling": "stressed",
+      "context": "challenge-completion",
+      "dayCompleted": 1,
+      "timestamp": "2025-12-10T14:57:40.625Z"
     }
   ],
   "user-test": [
@@ -976,6 +1000,61 @@
         "generatedBy": "AI",
         "completedTime": 1765287025654
       }
+    ],
+    "user": [
+      {
+        "id": "1765378610242",
+        "name": "Stress Reset Rally",
+        "startTime": 1765378610242,
+        "status": "active",
+        "days": [
+          {
+            "day": 1,
+            "completed": true,
+            "tasks": [
+              {
+                "name": "4-7-8 Breathing Exercise",
+                "completed": false
+              },
+              {
+                "name": "Body Scan and Progressive Muscle Relaxation",
+                "completed": true
+              }
+            ],
+            "completedTime": 1765378636547
+          },
+          {
+            "day": 2,
+            "completed": false,
+            "tasks": [
+              {
+                "name": "Short Walk or Stretching",
+                "completed": false
+              },
+              {
+                "name": "Gratitude and Connection Exercise",
+                "completed": false
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "completed": false,
+            "tasks": [
+              {
+                "name": "Guided Imagery and Visualization",
+                "completed": false
+              },
+              {
+                "name": "Mindful Self-Compassion Exercise",
+                "completed": false
+              }
+            ]
+          }
+        ],
+        "dailyProgress": {},
+        "generatedBy": "AI"
+      }
     ]
   },
   "dashboardData": {
@@ -1160,8 +1239,76 @@
           "context": "challenge-completion",
           "dayCompleted": 3,
           "timestamp": "2025-12-09T13:30:28.706Z"
+        },
+        {
+          "mood": 2,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T15:31:15.281Z"
+        }
+      ]
+    },
+    "user": {
+      "completedChallenges": [],
+      "moodEntries": [
+        {
+          "mood": 4,
+          "stress": 1,
+          "feeling": "stressed",
+          "context": "challenge-completion",
+          "dayCompleted": 1,
+          "timestamp": "2025-12-10T14:57:38.589Z"
+        },
+        {
+          "mood": 4,
+          "stress": 1,
+          "feeling": "stressed",
+          "context": "challenge-completion",
+          "dayCompleted": 1,
+          "timestamp": "2025-12-10T14:57:40.625Z"
+        }
+      ]
+    },
+    "amiteshsinghsmsit": {
+      "completedChallenges": [],
+      "moodEntries": [
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T17:40:56.815Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T17:41:05.876Z"
         }
       ]
     }
-  }
+  },
+  "amiteshsinghsmsit": [
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T17:40:56.815Z"
+    },
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T17:41:05.876Z"
+    }
+  ]
 }

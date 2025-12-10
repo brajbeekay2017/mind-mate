@@ -168,15 +168,20 @@ async function generateChatReply(message, options = {}) {
   }
 
   for (const p of tryProviders) {
+    const modelName = p === 'groq' ? GROQ_MODEL : p === 'openai' ? OPENAI_MODEL : 'claude-4.5-haiku';
+    console.log(`🔎 [LLM] Trying ${p} (model=${modelName})`);
     let result = null;
     if (p === 'groq') result = await tryGroq();
     if (p === 'openai') result = await tryOpenAI();
     if (p === 'claude') result = await tryClaude();
-    if (result) return result;
+    if (result) {
+      console.log(`✅ [LLM] Using ${p} (model=${modelName})`);
+      return result;
+    }
   }
 
   // Fallback: Deterministic responses
-  console.log('📌 Using FALLBACK response');
+  console.log(`📌 Using FALLBACK response (providers tried: ${tryProviders.join(' -> ')})`);
   const fallbacks = [
     `Thanks for sharing — I hear you. Take a moment to notice your breath. If you'd like, tell me more and I can help reflect on what might help next.`,
     `It sounds like you're going through something. Remember, it's okay to feel this way. What's one small thing that usually helps you feel better?`,
@@ -277,14 +282,20 @@ async function generateSummary(entries, dataContext) {
   }
 
   for (const p of tryProviders) {
+    const modelName = p === 'groq' ? GROQ_MODEL : p === 'openai' ? OPENAI_MODEL : 'claude-4.5-haiku';
+    console.log(`🔎 [LLM] Trying ${p} (model=${modelName})`);
     let result = null;
     if (p === 'groq') result = await tryGroqSummary();
     if (p === 'openai') result = await tryOpenAISummary();
     if (p === 'claude') result = await tryClaudeSummary();
-    if (result) return result;
+    if (result) {
+      console.log(`✅ [LLM] Using ${p} (model=${modelName})`);
+      return result;
+    }
   }
 
   // Fallback summary with actual stats
+  console.log(`📌 Using FALLBACK summary (providers tried: ${tryProviders.join(' -> ')})`);
   const count = entries.length;
   const avgM = dataContext?.avgMood || 2;
   const avgS = dataContext?.avgStress || 2.5;

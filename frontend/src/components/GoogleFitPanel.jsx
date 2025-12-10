@@ -13,11 +13,49 @@ export default function GoogleFitPanel({ entries = [] }) {
   const [sevenDayData, setSevenDayData] = useState(null);
 
   useEffect(() => {
-    checkGoogleFitConnection();
+    // Check immediately on mount (this runs when App loads after login)
+    const token = localStorage.getItem('googlefit_token');
+    console.log('[GoogleFitPanel] ========================================');
+    console.log('[GoogleFitPanel] Component mounted!');
+    console.log('[GoogleFitPanel] Token check:', token ? `Token found (${token.substring(0, 20)}...)` : 'NO TOKEN FOUND');
+    console.log('[GoogleFitPanel] All localStorage keys:', Object.keys(localStorage));
+    console.log('[GoogleFitPanel] ========================================');
+    
+    if (token) {
+      console.log('[GoogleFitPanel] ✅ Token found on mount, fetching data...');
+      setIsConnected(true);
+      setShowDetails(true);
+      fetchGoogleFitData(token);
+    } else {
+      console.log('[GoogleFitPanel] ⚠️ No token found on mount. User needs to connect Google Fit.');
+    }
+
+    // Listen for storage changes (when token is added by LoginPage)
+    const handleStorageChange = (e) => {
+      if (e.key === 'googlefit_token' && e.newValue) {
+        console.log('[GoogleFitPanel] Storage event: token added');
+        checkGoogleFitConnection();
+      }
+    };
+
+    // Listen for custom event (when LoginPage adds token)
+    const handleTokenAdded = (e) => {
+      console.log('[GoogleFitPanel] Custom event: googlefit_token_added', e.detail);
+      checkGoogleFitConnection();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('googlefit_token_added', handleTokenAdded);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('googlefit_token_added', handleTokenAdded);
+    };
   }, []);
 
   const checkGoogleFitConnection = () => {
     const token = localStorage.getItem('googlefit_token');
+    console.log('[GoogleFitPanel] checkGoogleFitConnection called, token:', token ? 'exists' : 'missing');
     if (token) {
       setIsConnected(true);
       setShowDetails(true); // Auto-expand to show data
