@@ -68,7 +68,15 @@ export default function BreathingExercise(){
   };
 
   return (
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 0'}}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '12px 0',
+      width: '100%',
+      paddingLeft: '5%'
+    }}>
       <div 
         className="breathing-circle"
         style={{
@@ -130,8 +138,11 @@ export default function BreathingExercise(){
         fontSize: '12px',
         color: '#999',
         textAlign: 'center',
-        maxWidth: '300px',
-        fontStyle: 'italic'
+        maxWidth: '420px',
+        fontStyle: 'italic',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       }}>
         Follow the expanding and contracting circle. This 5-4-5 breathing technique helps calm your nervous system.
       </div>
