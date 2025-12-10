@@ -371,6 +371,158 @@
       "mood": 4,
       "stress": 4,
       "timestamp": "2025-12-03T16:00:48.337Z"
+    },
+    {
+      "mood": 3,
+      "stress": 3,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:15:15.622Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:15:17.163Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:33.508Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:35.178Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:35.786Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:37.721Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:39.414Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:39.934Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:40.446Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:41.001Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:41.408Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:20:42.024Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:22:49.649Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:22:50.211Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:22:51.812Z"
+    },
+    {
+      "mood": 4,
+      "stress": 4,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:22:52.338Z"
+    },
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:30:28.489Z"
+    },
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:30:30.071Z"
+    },
+    {
+      "mood": 2,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-10T16:37:16.173Z"
     }
   ],
   "user-test": [
@@ -1160,6 +1312,163 @@
           "context": "challenge-completion",
           "dayCompleted": 3,
           "timestamp": "2025-12-09T13:30:28.706Z"
+        }
+      ]
+    },
+    "user": {
+      "completedChallenges": [],
+      "moodEntries": [
+        {
+          "mood": 3,
+          "stress": 3,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:15:15.622Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:15:17.163Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:33.508Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:35.178Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:35.786Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:37.721Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:39.414Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:39.934Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:40.446Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:41.001Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:41.408Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:20:42.024Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:22:49.649Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:22:50.211Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:22:51.812Z"
+        },
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:22:52.338Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:30:28.489Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:30:30.071Z"
+        },
+        {
+          "mood": 2,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T16:37:16.173Z"
         }
       ]
     }
