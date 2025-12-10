@@ -21,6 +21,7 @@ export default function App({ onLogout }){
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userId, setUserId] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [stressAlert, setStressAlert] = useState(null)
 
   useEffect(()=>{
     // load last 10 entries from backend, or from localStorage fallback
@@ -71,6 +72,36 @@ export default function App({ onLogout }){
       fetchSummaryForUser();
       return () => { mounted = false; };
     }, [entries, userId]);
+
+  // Poll stress-check endpoint every 1s while on dashboard to show notification
+  useEffect(() => {
+    let mounted = true;
+    let interval = null;
+    async function fetchStress() {
+      if (!userId) return;
+      try {
+        const googleFitData = JSON.parse(localStorage.getItem('googlefit_latest') || 'null') || {};
+        const res = await fetch(`http://localhost:4000/alerts/stress-check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, googleFitData })
+        });
+        if (!mounted) return;
+        const j = await res.json();
+        if (res.ok) setStressAlert(j);
+      } catch (e) {
+        // don't spam console on every tick
+      }
+    }
+
+    if (activeTab === 'dashboard' && userId) {
+      // initial fetch then every 1s
+      fetchStress();
+      interval = setInterval(fetchStress, 1000);
+    }
+
+    return () => { mounted = false; if (interval) clearInterval(interval); };
+  }, [activeTab, userId, entries]);
 
   const handleClearData = async () => {
     // Check if there's any data to clear
@@ -152,7 +183,27 @@ export default function App({ onLogout }){
       </div>
       
       {activeTab === 'dashboard' && (
-      <div className="app-grid">
+        <div style={{padding:16}}>
+          {/* Dashboard-level stress alert banner */}
+          {stressAlert && (
+            <div style={{marginBottom:12, borderRadius:10, padding:14, display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, boxShadow:'0 6px 22px rgba(0,0,0,0.06)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:52, height:52, borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:800, fontSize:18, background: stressAlert.severity === 'very_high' ? '#9b1c1c' : (stressAlert.severity === 'high' ? '#d32f2f' : (stressAlert.severity === 'moderate' ? '#ff9800' : '#4caf50'))}}>
+                  {stressAlert.severity === 'very_high' ? '!!' : (stressAlert.severity === 'high' ? '!' : (stressAlert.severity === 'moderate' ? '•' : '✓'))}
+                </div>
+                <div>
+                  <div style={{fontSize:16, fontWeight:800, color:'#222'}}>{(stressAlert.severity || 'Unknown').toUpperCase()} STRESS</div>
+                  <div style={{color:'#444', fontSize:13, marginTop:4, maxWidth:800}}>{stressAlert.assessment ? stressAlert.assessment.split('\n')[0] : (stressAlert.reasons && stressAlert.reasons.length ? stressAlert.reasons.join('; ') : 'No issues detected')}</div>
+                </div>
+              </div>
+              <div style={{display:'flex', gap:8, alignItems:'center'}}>
+                <button onClick={() => { if (stressAlert?.spoken) { const u = new SpeechSynthesisUtterance(stressAlert.spoken); window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } }} style={{padding:'10px 14px', borderRadius:8, border:'none', background:'#4FD1C5', color:'#fff', fontWeight:700}}>🔊 Play</button>
+                <button onClick={() => setActiveTab('alerts')} style={{padding:'10px 12px', borderRadius:8, border:'1px solid #ddd', background:'#fff'}}>View Details</button>
+              </div>
+            </div>
+          )}
+
+          <div className="app-grid">
         <div className="card">
           <MoodInput onSaved={(e)=>{ setEntries(e); localStorage.setItem('mindmate_entries', JSON.stringify(e)); }} />
           <GoogleFitPanel entries={entries} />
