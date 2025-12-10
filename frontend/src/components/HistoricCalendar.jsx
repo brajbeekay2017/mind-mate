@@ -14,6 +14,7 @@ export default function HistoricCalendar({ entries = [], userId }) {
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [activeTab, setActiveTab] = useState('daily'); // 'daily', 'trends', 'analysis'
   const [monthlyEntries, setMonthlyEntries] = useState([]);
+  const [syncTimestamp, setSyncTimestamp] = useState(null);
 
   // Helper to format date keys as YYYY-MM-DD (local)
   const formatDateKey = (d) => {
@@ -30,6 +31,14 @@ export default function HistoricCalendar({ entries = [], userId }) {
       await Promise.all([fetchGoogleFitDataForMonth(), fetchMonthlyMoodEntries()]);
     };
     fetchAllForMonth();
+    // read last google fit sync time from localStorage if available
+    try {
+      const raw = localStorage.getItem('googlefit_latest');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.timestamp) setSyncTimestamp(parsed.timestamp);
+      }
+    } catch (e) {}
   }, [currentMonth, userId]);
 
   // Listen for Google Fit connect/refresh events from `GoogleFitPanel` in the same window
@@ -39,6 +48,8 @@ export default function HistoricCalendar({ entries = [], userId }) {
       try {
         fetchGoogleFitDataForMonth();
         fetchMonthlyMoodEntries();
+        // update sync timestamp from localStorage
+        try { const raw = localStorage.getItem('googlefit_latest'); if (raw) { const p = JSON.parse(raw); if (p?.timestamp) setSyncTimestamp(p.timestamp); } } catch(e) {}
       } catch (err) {
         console.error('Error re-fetching monthly data on connect:', err);
       }
@@ -60,7 +71,33 @@ export default function HistoricCalendar({ entries = [], userId }) {
       const res = await fetch(`http://localhost:4000/google-fit/monthly?accessToken=${token}&year=${year}&month=${month}`);
       if (res.ok) {
         const data = await res.json();
-        setGoogleFitData(data.dailyData || {});
+        // Normalize daily data so calendar has reliable numeric `steps`, `heartPoints`, and `sleepHours`.
+        const rawDaily = data.dailyData || {};
+        console.log('📊 [Calendar] Raw monthly Google Fit dailyData:', rawDaily);
+        const normalized = {};
+        Object.keys(rawDaily).forEach(k => {
+          const src = rawDaily[k] || {};
+          const steps = (typeof src.steps === 'number') ? src.steps : ((typeof src.totalSteps === 'number') ? src.totalSteps : Number(src.steps || 0));
+          const hpCandidate = (typeof src.heartPoints !== 'undefined') ? src.heartPoints : (typeof src.heartMinutes !== 'undefined' ? src.heartMinutes : (typeof src.totalHeartMinutes !== 'undefined' ? src.totalHeartMinutes : undefined));
+          const sleepMinutes = typeof src.sleepMinutes === 'number' ? src.sleepMinutes : Number(src.sleepMinutes || 0);
+          const sleepHours = typeof src.sleepHours === 'number' ? src.sleepHours : (sleepMinutes ? Number((sleepMinutes / 60).toFixed(1)) : undefined);
+
+          normalized[k] = Object.assign({}, src, { steps: Number(steps || 0) });
+          if (typeof hpCandidate !== 'undefined') normalized[k].heartPoints = Number(hpCandidate || 0);
+          if (sleepMinutes) normalized[k].sleepMinutes = sleepMinutes;
+          if (typeof sleepHours !== 'undefined') normalized[k].sleepHours = sleepHours;
+        });
+        console.log('✅ [Calendar] Normalized Google Fit data:', normalized);
+        setGoogleFitData(normalized);
+
+        // update sync timestamp if available in localStorage
+        try {
+          const raw = localStorage.getItem('googlefit_latest');
+          if (raw) {
+            const p = JSON.parse(raw);
+            if (p?.timestamp) setSyncTimestamp(p.timestamp);
+          }
+        } catch (e) {}
       }
     } catch (e) {
       console.error('Error fetching Google Fit data:', e);
@@ -129,6 +166,19 @@ export default function HistoricCalendar({ entries = [], userId }) {
 
   // Use monthlyEntries if available, otherwise fall back to prop `entries`
   const entriesSource = (Array.isArray(monthlyEntries) && monthlyEntries.length > 0) ? monthlyEntries : entries;
+
+  // Determine last available Google Fit date key (YYYY-MM-DD) from the returned monthly data
+  const getLastAvailableGFKey = () => {
+    try {
+      const keys = Object.keys(googleFitData || {});
+      if (!keys || keys.length === 0) return null;
+      const sorted = keys.slice().sort();
+      return sorted[sorted.length - 1];
+    } catch (e) {
+      return null;
+    }
+  };
+  const lastAvailableGFKey = getLastAvailableGFKey();
 
   // Get mood entries by date (accept optional overrideEntries)
   const getEntriesByDate = (date, overrideEntries) => {
@@ -307,7 +357,14 @@ export default function HistoricCalendar({ entries = [], userId }) {
             >
               ← Previous
             </button>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{monthName}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{monthName}</h3>
+              {syncTimestamp && (
+                <div style={{ fontSize: '11px', color: '#666', marginTop: 4 }} title={`Last sync: ${new Date(syncTimestamp).toLocaleString()}`}>
+                  <span style={{ fontWeight: 600 }}>Last sync:</span>&nbsp;{new Date(syncTimestamp).toLocaleString()}
+                </div>
+              )}
+            </div>
             <button
               onClick={nextMonth}
               style={{
@@ -443,19 +500,48 @@ export default function HistoricCalendar({ entries = [], userId }) {
                       </div>
                     )}
 
-                    {/* Google Fit indicator - Steps & Heart Points */}
-                    {gfData && (gfData.steps > 0 || gfData.heartPoints > 0) && (
+                    {/* Google Fit indicator - Steps & Heart Points (show for all dates up to today) */}
+                    {gfData && date <= new Date() && (
                       <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px', alignItems: 'center' }}>
-                        {gfData.steps > 0 && (
-                          <div style={{ fontSize: '11px', color: '#4FD1C5', fontWeight: '600' }}>
+                        {/* Steps: always show if gfData exists */}
+                        {typeof gfData.steps !== 'undefined' && (
+                          <div style={{ fontSize: '11px', color: '#4FD1C5', fontWeight: '600' }} title={`Steps: ${gfData.steps}`}>
                             🚶 {gfData.steps}
                           </div>
                         )}
-                        {gfData.heartPoints > 0 && (
-                          <div style={{ fontSize: '11px', color: '#e74c3c', fontWeight: '600' }}>
-                            ❤️ {gfData.heartPoints}
-                          </div>
-                        )}
+                        {/* Heart Points: accept alternative fields and show when present; faded when explicitly 0 */}
+                        {(() => {
+                          const hp = (gfData && (typeof gfData.heartPoints !== 'undefined' ? gfData.heartPoints : (typeof gfData.heartMinutes !== 'undefined' ? gfData.heartMinutes : (typeof gfData.totalHeartMinutes !== 'undefined' ? gfData.totalHeartMinutes : undefined))));
+                          if (typeof hp === 'undefined') return null;
+                          return (
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                color: '#e74c3c',
+                                fontWeight: '600',
+                                opacity: (typeof hp === 'number' && hp === 0) ? 0.45 : 1
+                              }}
+                              title={`Heart Points: ${hp}. Heart Points (HP) measure vigorous activity (higher is better).`}
+                            >
+                              ❤️ {hp}
+                            </div>
+                          );
+                        })()}
+                        {/* Sleep: show if available (hours or minutes) */}
+                        {(() => {
+                          const sleepH = typeof gfData.sleepHours !== 'undefined' ? gfData.sleepHours : undefined;
+                          const sleepM = typeof gfData.sleepMinutes === 'number' ? gfData.sleepMinutes : undefined;
+                          const displayH = typeof sleepH !== 'undefined' ? sleepH : (sleepM ? Number((sleepM / 60).toFixed(1)) : undefined);
+                          if (typeof displayH === 'undefined') return null;
+                          return (
+                            <div
+                              style={{ fontSize: '11px', color: '#9b59b6', fontWeight: '600' }}
+                              title={`Sleep: ${displayH} hours`}
+                            >
+                              😴 {displayH}h
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </>
@@ -567,20 +653,129 @@ export default function HistoricCalendar({ entries = [], userId }) {
                       border: '2px solid #4FD1C5',
                     }}
                   >
-                    <div style={{ marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#666' }}>🚶 Steps: </span>
-                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
-                        {googleFitData[formatDateKey(selectedDate)]?.steps || 0}
-                      </span>
+                    {/* Date Header */}
+                    <div style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #eee', fontSize: '11px', fontWeight: '600', color: '#4FD1C5' }}>
+                      📅 {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </div>
-                    {googleFitData[formatDateKey(selectedDate)]?.heartPoints && (
+
+                    {/* Primary Metrics - Steps and Heart Points */}
+                    <div style={{ marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <div>
-                        <span style={{ fontSize: '12px', color: '#666' }}>❤️ Heart Points: </span>
-                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#e74c3c' }}>
-                          {googleFitData[formatDateKey(selectedDate)]?.heartPoints}
-                        </span>
+                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>Steps</div>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#4FD1C5' }}>
+                          {googleFitData[formatDateKey(selectedDate)]?.steps || 0}
+                        </div>
                       </div>
-                    )}
+                      
+                      {/* Heart Points */}
+                      <div>
+                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>Heart Points</div>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#e74c3c' }}>
+                          {(() => {
+                            const gf = googleFitData[formatDateKey(selectedDate)];
+                            const hp = (gf && (typeof gf.heartPoints !== 'undefined' ? gf.heartPoints : (typeof gf.heartMinutes !== 'undefined' ? gf.heartMinutes : (typeof gf.totalHeartMinutes !== 'undefined' ? gf.totalHeartMinutes : 0))));
+                            return typeof hp === 'number' ? hp : 0;
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Heart Rate Metrics */}
+                    {(() => {
+                      const gf = googleFitData[formatDateKey(selectedDate)];
+                      const hasRHR = typeof gf?.restingHeartRate === 'number';
+                      const hasAvgHR = typeof gf?.avgHeartRate === 'number';
+                      if (!hasRHR && !hasAvgHR) return null;
+                      return (
+                        <div style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #eee', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                          {hasRHR && (
+                            <div>
+                              <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>Resting HR</div>
+                              <div style={{ fontSize: '16px', fontWeight: '600', color: '#3498db' }}>
+                                {Math.round(gf.restingHeartRate)} bpm
+                              </div>
+                            </div>
+                          )}
+                          {hasAvgHR && (
+                            <div>
+                              <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>Avg Heart Rate</div>
+                              <div style={{ fontSize: '16px', fontWeight: '600', color: '#e67e22' }}>
+                                {Math.round(gf.avgHeartRate)} bpm
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Sleep Data */}
+                    {(() => {
+                      const gf = googleFitData[formatDateKey(selectedDate)];
+                      const sleepH = gf ? gf.sleepHours : undefined;
+                      const sleepM = gf && typeof gf.sleepMinutes === 'number' ? gf.sleepMinutes : undefined;
+                      const displayH = typeof sleepH !== 'undefined' ? sleepH : (sleepM ? Number((sleepM / 60).toFixed(1)) : undefined);
+                      if (typeof displayH === 'undefined') return null;
+                      return (
+                        <div style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #eee' }}>
+                          <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>Sleep Duration</div>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: '#9b59b6', marginBottom: '4px' }}>
+                            {displayH} hours
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#aaa' }}>
+                            ({sleepM || Math.round((displayH * 60))} minutes)
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Other Available Data */}
+                    {(() => {
+                      const gf = googleFitData[formatDateKey(selectedDate)];
+                      if (!gf) return null;
+                      const otherKeys = Object.keys(gf).filter(
+                        k => !['steps', 'heartPoints', 'heartMinutes', 'totalHeartMinutes', 'restingHeartRate', 'avgHeartRate', 'sleepHours', 'sleepMinutes', 'timestamp'].includes(k)
+                      );
+                      if (otherKeys.length === 0) return null;
+                      return (
+                        <div style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #eee' }}>
+                          <div style={{ fontSize: '11px', color: '#999', marginBottom: '6px', fontWeight: '600' }}>Other Metrics:</div>
+                          {otherKeys.map((key, idx) => {
+                            const val = gf[key];
+                            let displayVal = val;
+                            if (typeof val === 'number') displayVal = Math.round(val * 100) / 100;
+                            return (
+                              <div key={idx} style={{ fontSize: '11px', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: '#666', textTransform: 'capitalize' }}>
+                                  {key.replace(/([A-Z])/g, ' $1').trim()}:
+                                </span>
+                                <span style={{ fontWeight: '600', color: '#555' }}>{displayVal}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Activity Summary */}
+                    <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '6px', fontSize: '11px', color: '#666' }}>
+                      <div style={{ marginBottom: '4px', fontWeight: '600', color: '#333' }}>Activity Summary:</div>
+                      <div>
+                        {(() => {
+                          const gf = googleFitData[formatDateKey(selectedDate)];
+                          const steps = gf?.steps || 0;
+                          const hp = (() => {
+                            const h = gf && (typeof gf.heartPoints !== 'undefined' ? gf.heartPoints : (typeof gf.heartMinutes !== 'undefined' ? gf.heartMinutes : (typeof gf.totalHeartMinutes !== 'undefined' ? gf.totalHeartMinutes : 0)));
+                            return typeof h === 'number' ? h : 0;
+                          })();
+                          
+                          if (steps > 8000) return '✅ Excellent activity level!';
+                          if (steps > 5000) return '👍 Good activity level';
+                          if (hp > 30) return '💪 Strong vigorous activity';
+                          if (steps > 0) return '📊 Light activity logged';
+                          return '⚠️ No activity data';
+                        })()}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ fontSize: '14px', color: '#999' }}>

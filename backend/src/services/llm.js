@@ -64,8 +64,11 @@ IMPORTANT FORMATTING GUIDELINES:
 // ============================================
 // MAIN: Generate Chat Reply (multi-provider)
 // ============================================
-async function generateChatReply(message) {
-  const tryProviders = LLM_PROVIDER === 'auto' ? ['groq', 'openai', 'claude'] : [LLM_PROVIDER];
+async function generateChatReply(message, options = {}) {
+  const providerOverride = options.provider ? String(options.provider).toLowerCase() : null;
+  const tryProviders = providerOverride
+    ? [providerOverride]
+    : (LLM_PROVIDER === 'auto' ? ['groq', 'openai', 'claude'] : [LLM_PROVIDER]);
 
   // Helper: attempt Groq
   async function tryGroq() {
