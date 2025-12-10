@@ -114,7 +114,7 @@ export default function App({ onLogout }){
   return (
     <div style={{display:'flex',flexDirection:'column',height:'100vh'}}>
       <div style={{padding:20,background:'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)',display:'flex',flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:16,flexShrink:0}}>
-        <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',minWidth:'fit-content'}}>
           <div className="logo-circle">
             <img src={mindMateLogo} alt="Mind Mate" style={{height:80,width:80,objectFit:'contain'}} />
           </div>
@@ -132,7 +132,7 @@ export default function App({ onLogout }){
             <BreathingExercise />
           </div>
         </div>
-        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+        <div style={{display:'flex',gap:10,alignItems:'center',minWidth:'fit-content'}}>
           <StressAlertNotification userId={userId} refreshKey={refreshKey} />
           <button 
             onClick={handleClearData}
@@ -156,7 +156,7 @@ export default function App({ onLogout }){
       </div>
       
       {activeTab === 'dashboard' && (
-      <div className="app-grid">
+      <div className="app-grid" style={{marginTop: '-40px'}}>
         <div className="card">
           <MoodInput onSaved={(e)=>{ setEntries(e); localStorage.setItem('mindmate_entries', JSON.stringify(e)); setRefreshKey(prev => prev + 1); }} />
           <GoogleFitPanel entries={entries} />

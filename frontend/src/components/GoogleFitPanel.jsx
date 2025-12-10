@@ -9,7 +9,7 @@ export default function GoogleFitPanel({ entries = [] }) {
   const [error, setError] = useState('');
   const [tokenExpired, setTokenExpired] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [timePeriod, setTimePeriod] = useState('today'); // 'today' or '7days'
+  const [timePeriod, setTimePeriod] = useState('today');
   const [sevenDayData, setSevenDayData] = useState(null);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function GoogleFitPanel({ entries = [] }) {
     console.log('[GoogleFitPanel] checkGoogleFitConnection called, token:', token ? 'exists' : 'missing');
     if (token) {
       setIsConnected(true);
-      setShowDetails(true); // Auto-expand to show data
+      setShowDetails(true);
       fetchGoogleFitData(token);
     }
   };
@@ -91,10 +91,9 @@ export default function GoogleFitPanel({ entries = [] }) {
           } else if (accessToken) {
             localStorage.setItem('googlefit_token', accessToken);
             setIsConnected(true);
-            setShowDetails(true); // Auto-expand to show data
+            setShowDetails(true);
             setError('');
             fetchGoogleFitData(accessToken);
-            // Notify other components in the same window that Google Fit is connected
             try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken } })); } catch(e) {}
             window.removeEventListener('message', handleMessage);
             if (authWindow && !authWindow.closed) {
@@ -126,32 +125,24 @@ export default function GoogleFitPanel({ entries = [] }) {
       setLoading(true);
       setError('');
       
-      // Fetch all three metrics in parallel for today
       const [stepsRes, heartRes, targetRes] = await Promise.all([
         fetch(`http://localhost:4000/google-fit/steps-today?accessToken=${accessToken}`),
         fetch(`http://localhost:4000/google-fit/heart-points?accessToken=${accessToken}`),
         fetch(`http://localhost:4000/google-fit/target-steps?accessToken=${accessToken}`)
       ]);
       
-      // If any response is 401, mark tokenExpired but do not remove token from storage.
       if (stepsRes.status === 401 || heartRes.status === 401 || targetRes.status === 401) {
-        console.warn('[GoogleFitPanel] Received 401 from Google Fit endpoints - token may be expired');
+        console.warn('[GoogleFitPanel] Received 401 from Google Fit endpoints');
         setTokenExpired(true);
-        setError('Google Fit authorization expired. Click Reconnect to re-authorize (token will be kept until you explicitly disconnect).');
-        // still attempt to parse responses if available, but avoid removing token
+        setError('Google Fit authorization expired. Click 🔗 to re-authorize.');
       }
       if (!stepsRes.ok || !heartRes.ok || !targetRes.ok) {
-        // If non-auth related failure, surface a generic error but keep token as well
         if (!tokenExpired) throw new Error('Failed to fetch one or more metrics');
       }
       
       const stepsData = await stepsRes.json();
       const heartData = await heartRes.json();
       const targetData = await targetRes.json();
-      
-      console.log('[GoogleFitPanel] Steps:', stepsData);
-      console.log('[GoogleFitPanel] Heart:', heartData);
-      console.log('[GoogleFitPanel] Target:', targetData);
       
       if (stepsData.success) {
         setStepsToday(stepsData.data.steps || 0);
@@ -163,7 +154,6 @@ export default function GoogleFitPanel({ entries = [] }) {
         setTargetSteps(targetData.data.targetSteps || 10000);
       }
       
-      // Store Google Fit data to localStorage for stress indicator
       const googleFitLatest = {
         stepsToday: stepsData.data?.steps || 0,
         heartPoints: heartData.data?.heartPoints || 0,
@@ -174,11 +164,9 @@ export default function GoogleFitPanel({ entries = [] }) {
       };
       localStorage.setItem('googlefit_latest', JSON.stringify(googleFitLatest));
       
-      // Also fetch 7-day data for comparison
       await fetchSevenDayData(accessToken);
     } catch (err) {
       console.error('Failed to fetch Google Fit data:', err);
-      // Do not treat fetch errors as an immediate logout. Keep token until user disconnects.
       setError(`Data fetch error: ${err.message}`);
     } finally {
       setLoading(false);
@@ -199,20 +187,15 @@ export default function GoogleFitPanel({ entries = [] }) {
       const stepsData = await stepsRes.json();
       const heartData = await heartRes.json();
       
-      console.log('[GoogleFitPanel 7Days] Steps:', stepsData);
-      console.log('[GoogleFitPanel 7Days] Heart:', heartData);
-      
       setSevenDayData({
         steps: stepsData.data,
         heart: heartData.data
       });
       
-      // Update localStorage with resting heart rate estimate (minimum daily average)
       if (heartData.success && heartData.data?.dailyAverages?.length > 0) {
         const dailyAverages = heartData.data.dailyAverages;
         const minHeartRate = Math.min(...dailyAverages.map(d => d.average));
         
-        // Update googlefit_latest with resting HR estimate
         const googleFitLatest = JSON.parse(localStorage.getItem('googlefit_latest') || '{}');
         googleFitLatest.restingHeartRate = minHeartRate;
         googleFitLatest.avgHeartRate = Math.round(dailyAverages.reduce((sum, d) => sum + d.average, 0) / dailyAverages.length);
@@ -224,8 +207,9 @@ export default function GoogleFitPanel({ entries = [] }) {
   };
 
   const handleDisconnect = () => {
-    if (window.confirm('Are you sure you want to disconnect Google Fit? You can reconnect anytime.')) {
+    if (window.confirm('Disconnect Google Fit? You can reconnect anytime.')) {
       localStorage.removeItem('googlefit_token');
+      localStorage.removeItem('googlefit_latest');
       setIsConnected(false);
       setStepsToday(0);
       setHeartPoints(0);
@@ -244,7 +228,7 @@ export default function GoogleFitPanel({ entries = [] }) {
   };
 
   return (
-    <div style={{ padding: 12, fontSize: '13px', lineHeight: '1.6' }}>
+    <div style={{ padding: 10, fontSize: '12px', lineHeight: '1.5' }}>
       {!isConnected ? (
         <div>
           <button
@@ -252,48 +236,47 @@ export default function GoogleFitPanel({ entries = [] }) {
             disabled={loading}
             style={{
               width: '100%',
-              padding: '10px 12px',
+              padding: '8px 10px',
               borderRadius: 6,
               background: '#EA4335',
               color: '#fff',
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
               fontWeight: 600,
+              fontSize: '12px',
               opacity: loading ? 0.6 : 1,
               transition: 'all 0.3s ease',
-              marginBottom: error ? '10px' : 0
+              marginBottom: error ? '8px' : 0
             }}
             onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
             onMouseOut={(e) => !loading && (e.target.style.transform = 'translateY(0)')}
           >
-            {loading ? ' Connecting...' : ' Connect Google Fit'}
+            {loading ? '⏳ Connecting...' : '🔗 Connect Google Fit'}
           </button>
           
           {error && (
             <div style={{
               background: '#fee',
               color: '#c33',
-              padding: '8px 10px',
+              padding: '6px 8px',
               borderRadius: 6,
-              marginTop: '8px',
-              fontSize: '12px',
-              textAlign: 'left'
+              marginTop: '6px',
+              fontSize: '11px'
             }}>
-               {error}
+              {error}
             </div>
           )}
         </div>
       ) : (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <div style={{ flex: 1 }}>
-              <h5 style={{ margin: '0 0 4px 0', color: '#0F4761', fontSize: '14px', fontWeight: 600 }}>
+              <h5 style={{ margin: '0 0 3px 0', color: '#0F4761', fontSize: '13px', fontWeight: 600 }}>
                 ✅ Google Fit Connected
               </h5>
               {stepsToday > 0 && (
-                <p style={{ margin: 0, fontSize: '11px', color: '#666' }}>
-                  {/* ✅ UPDATED: Show Heart Points (HP) instead of vigorous mins */}
-                  {stepsToday.toLocaleString()} / {targetSteps.toLocaleString()} steps • {heartPoints} HP
+                <p style={{ margin: 0, fontSize: '10px', color: '#666' }}>
+                  🚶 {stepsToday.toLocaleString()} / {targetSteps.toLocaleString()} • ❤️ {heartPoints} HP
                 </p>
               )}
             </div>
@@ -304,9 +287,9 @@ export default function GoogleFitPanel({ entries = [] }) {
                 border: 'none',
                 color: '#6FA8F1',
                 cursor: 'pointer',
-                fontSize: '12px',
+                fontSize: '14px',
                 fontWeight: 600,
-                padding: '2px 4px'
+                padding: '0 4px'
               }}
             >
               {showDetails ? '▼' : '▶'}
@@ -316,64 +299,63 @@ export default function GoogleFitPanel({ entries = [] }) {
           {showDetails && (
             <>
               {/* Period Tabs */}
-              <div style={{ display: 'flex', gap: 4, marginBottom: '10px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+              <div style={{ display: 'flex', gap: 3, marginBottom: '8px', borderBottom: '1px solid #ddd', paddingBottom: '6px' }}>
                 <button
                   onClick={() => setTimePeriod('today')}
                   style={{
+                    flex: 1,
                     background: timePeriod === 'today' ? '#4FD1C5' : '#f0f0f0',
                     color: timePeriod === 'today' ? '#fff' : '#666',
                     border: 'none',
-                    borderRadius: 4,
-                    padding: '6px 12px',
-                    fontSize: '11px',
+                    borderRadius: 3,
+                    padding: '4px 8px',
+                    fontSize: '10px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
-                  onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 >
                   Today
                 </button>
                 <button
                   onClick={() => setTimePeriod('7days')}
                   style={{
-                    background: timePeriod === '7days' ? '#6FA8F1' : '#f0f0f0',
+                    flex: 1,
+                    background: timePeriod === '7days' ? '#4FD1C5' : '#f0f0f0',
                     color: timePeriod === '7days' ? '#fff' : '#666',
                     border: 'none',
-                    borderRadius: 4,
-                    padding: '6px 12px',
-                    fontSize: '11px',
+                    borderRadius: 3,
+                    padding: '4px 8px',
+                    fontSize: '10px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
-                  onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 >
-                  Past 7 Days
+                  7 Days
                 </button>
               </div>
 
               <div style={{
                 background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)',
-                padding: 10,
-                borderRadius: 8,
-                marginBottom: '10px'
+                padding: 8,
+                borderRadius: 6,
+                marginBottom: '8px',
+                fontSize: '11px'
               }}>
                 {loading ? (
-                  <p style={{ margin: 0, color: '#888' }}>Loading health data...</p>
+                  <p style={{ margin: 0, color: '#888' }}>Loading...</p>
                 ) : timePeriod === 'today' ? (
                   <>
-                    <p style={{ margin: '6px 0', fontSize: '12px' }}>
-                      <strong>Today's Steps:</strong> {stepsToday.toLocaleString()} / {targetSteps.toLocaleString()}
+                    <p style={{ margin: '4px 0', fontSize: '11px' }}>
+                      <strong>🚶 Steps:</strong> {stepsToday.toLocaleString()} / {targetSteps.toLocaleString()}
                     </p>
                     <div style={{
                       background: '#fff',
-                      height: '4px',
+                      height: '3px',
                       borderRadius: '2px',
-                      marginTop: '4px',
-                      marginBottom: '8px',
+                      marginTop: '3px',
+                      marginBottom: '6px',
                       overflow: 'hidden'
                     }}>
                       <div style={{
@@ -384,48 +366,24 @@ export default function GoogleFitPanel({ entries = [] }) {
                       }} />
                     </div>
                     
-                    {/* ✅ UPDATED: Heart Points instead of Vigorous Minutes */}
-                    <p style={{ margin: '8px 0 6px 0', fontSize: '12px' }}>
+                    <p style={{ margin: '4px 0', fontSize: '11px' }}>
                       <strong>❤️ Heart Points:</strong> {heartPoints} HP
                     </p>
-                    {heartPoints === 0 && (
-                      <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: '#999', fontStyle: 'italic' }}>
-                        No vigorous activity recorded today. Requires 70%+ max heart rate exercise.
-                      </p>
-                    )}
                   </>
                 ) : sevenDayData ? (
                   <>
-                    <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: 600, color: '#0F4761' }}>
-                      7-Day Summary
+                    <p style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 600, color: '#0F4761' }}>
+                      📊 7-Day Summary
                     </p>
-                    <p style={{ margin: '6px 0', fontSize: '12px' }}>
-                      <strong>Total Steps:</strong> {sevenDayData.steps.totalSteps.toLocaleString()}
+                    <p style={{ margin: '3px 0', fontSize: '10px' }}>
+                      🚶 Total: {sevenDayData.steps?.totalSteps?.toLocaleString() || 0}
                     </p>
-                    <p style={{ margin: '6px 0', fontSize: '12px' }}>
-                      <strong>Daily Average:</strong> {sevenDayData.steps.average.toLocaleString()} steps
+                    <p style={{ margin: '3px 0', fontSize: '10px' }}>
+                      📈 Daily Avg: {sevenDayData.steps?.average?.toLocaleString() || 0}
                     </p>
-                    
-                    {/* ✅ UPDATED: Heart Points instead of Vigorous Minutes */}
-                    {sevenDayData.heart && (
-                      <p style={{ margin: '6px 0', fontSize: '12px' }}>
-                        <strong>Heart Points:</strong> {sevenDayData.heart.totalHeartMinutes || 0} HP
-                      </p>
-                    )}
-                    
-                    {sevenDayData.steps.dailySteps.length > 0 && (
-                      <div style={{ marginTop: '8px', fontSize: '11px' }}>
-                        <p style={{ margin: '6px 0', fontWeight: 600 }}>Daily Breakdown:</p>
-                        {sevenDayData.steps.dailySteps.map((day, idx) => (
-                          <div key={idx} style={{ margin: '4px 0', color: '#666' }}>
-                            <span>{day.date}:</span> <strong>{day.steps.toLocaleString()}</strong> steps
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </>
                 ) : (
-                  <p style={{ margin: 0, color: '#888', fontSize: '12px' }}>No 7-day data available yet</p>
+                  <p style={{ margin: 0, color: '#888', fontSize: '10px' }}>No 7-day data</p>
                 )}
               </div>
             </>
@@ -435,24 +393,25 @@ export default function GoogleFitPanel({ entries = [] }) {
             <div style={{
               background: '#fee',
               color: '#c33',
-              padding: '8px 10px',
+              padding: '6px 8px',
               borderRadius: 6,
-              marginBottom: '10px',
-              fontSize: '12px'
+              marginBottom: '8px',
+              fontSize: '10px'
             }}>
-               {error}
+              {error}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 6 }}>
+          {/* Iconified Buttons */}
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
             <button
               onClick={handleRefresh}
               disabled={loading}
-              title="Refresh health data from Google Fit"
+              title="Refresh health data"
               style={{
                 flex: 1,
-                padding: '8px 10px',
-                borderRadius: 6,
+                padding: '6px 8px',
+                borderRadius: 5,
                 background: '#4FD1C5',
                 color: '#fff',
                 border: 'none',
@@ -460,33 +419,34 @@ export default function GoogleFitPanel({ entries = [] }) {
                 fontWeight: 600,
                 fontSize: '12px',
                 opacity: loading ? 0.6 : 1,
-                transition: 'all 0.3s ease'
+                transition: 'all 0.2s ease'
               }}
-              onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
-              onMouseOut={(e) => !loading && (e.target.style.transform = 'translateY(0)')}
+              onMouseOver={(e) => !loading && (e.target.style.transform = 'scale(1.05)')}
+              onMouseOut={(e) => !loading && (e.target.style.transform = 'scale(1)')}
             >
-              {loading ? '' : ''} Refresh
+              🔄
             </button>
             
             <button
               onClick={connectToGoogleFit}
-              title="Reconnect with a different Google account"
+              title="Reconnect with different account"
               style={{
                 flex: 1,
-                padding: '8px 10px',
-                borderRadius: 6,
+                padding: '6px 8px',
+                borderRadius: 5,
                 background: '#6FA8F1',
                 color: '#fff',
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: 600,
                 fontSize: '12px',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.2s ease'
               }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseOut={(e) => e.target.style.transform = 'scale(1)'
+              }
             >
-               Reconnect
+              🔗
             </button>
 
             <button
@@ -494,30 +454,32 @@ export default function GoogleFitPanel({ entries = [] }) {
               title="Disconnect Google Fit"
               style={{
                 flex: 1,
-                padding: '8px 10px',
-                borderRadius: 6,
+                padding: '6px 8px',
+                borderRadius: 5,
                 background: '#ff6b6b',
                 color: '#fff',
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: 600,
                 fontSize: '12px',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.2s ease'
               }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseOut={(e) => e.target.style.transform = 'scale(1)'
+              }
             >
-               Disconnect
+              ❌
             </button>
           </div>
 
           <p style={{
-            margin: '8px 0 0 0',
-            fontSize: '11px',
+            margin: '6px 0 0 0',
+            fontSize: '9px',
             fontStyle: 'italic',
-            color: '#888'
+            color: '#999',
+            textAlign: 'center'
           }}>
-             Tip: Click "Refresh" to sync latest health data, or "Reconnect" to use a different account.
+            🔄 Sync • 🔗 Switch • ❌ Disconnect
           </p>
         </div>
       )}

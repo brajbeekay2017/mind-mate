@@ -61,40 +61,58 @@ export default function StressAlertNotification({ userId, refreshKey }) {
     }
   }
 
+  // Determine animation intensity based on stress level
+  const getAnimationStyle = (level) => {
+    switch (level) {
+      case 'very_high':
+        return 'intense-pulse 0.8s ease-in-out infinite'
+      case 'high':
+        return 'strong-pulse 1.2s ease-in-out infinite'
+      case 'moderate':
+        return 'gentle-pulse 1.8s ease-in-out infinite'
+      default:
+        return 'subtle-pulse 2.5s ease-in-out infinite'
+    }
+  }
+
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Outer glow ring (animated) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '-6px',
+          left: '-6px',
+          right: '-6px',
+          bottom: '-6px',
+          borderRadius: '50%',
+          border: `2px solid ${getLevelColor(stressData.level)}`,
+          opacity: 0.3,
+          animation: getAnimationStyle(stressData.level),
+          pointerEvents: 'none'
+        }}
+      />
+
+      {/* Main circle button */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
-          padding: '10px 14px',
-          borderRadius: 10,
-          background: '#f5f5f5',
-          border: `2px solid ${getLevelColor(stressData.level)}`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          minWidth: 160,
           justifyContent: 'center',
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          background: getLevelColor(stressData.level),
           cursor: 'pointer',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          boxShadow: `0 0 16px ${getLevelColor(stressData.level)}60, inset 0 0 8px ${getLevelColor(stressData.level)}40`,
+          position: 'relative',
+          zIndex: 10
         }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        title="Hover to see details"
-      >
-        <div
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: '50%',
-            background: getLevelColor(stressData.level),
-            animation: stressData.level !== 'low' ? 'pulse 2s infinite' : 'none'
-          }}
-        />
-        <span style={{ fontWeight: 700, fontSize: 12, color: getLevelColor(stressData.level) }}>
-          {getLevelLabel(stressData.level)} Stress
-        </span>
-      </div>
+        title={getLevelLabel(stressData.level)}
+      />
 
       {/* Detailed Tooltip */}
       {showTooltip && (
@@ -113,7 +131,8 @@ export default function StressAlertNotification({ userId, refreshKey }) {
             zIndex: 1000,
             minWidth: 280,
             fontSize: 12,
-            color: '#333'
+            color: '#333',
+            animation: 'slideUp 0.3s ease-out'
           }}
         >
           {/* Header */}
@@ -218,9 +237,64 @@ export default function StressAlertNotification({ userId, refreshKey }) {
       )}
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+        /* Subtle animation for Low stress */
+        @keyframes subtle-pulse {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.3;
+          }
+          50% { 
+            transform: scale(1.1);
+            opacity: 0.6;
+          }
+        }
+
+        /* Gentle animation for Moderate stress */
+        @keyframes gentle-pulse {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.4;
+          }
+          50% { 
+            transform: scale(1.15);
+            opacity: 0.7;
+          }
+        }
+
+        /* Strong animation for High stress */
+        @keyframes strong-pulse {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          50% { 
+            transform: scale(1.2);
+            opacity: 0.85;
+          }
+        }
+
+        /* Intense animation for Very High/Critical stress */
+        @keyframes intense-pulse {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% { 
+            transform: scale(1.3);
+            opacity: 1;
+          }
+        }
+
+        /* Tooltip slide-in animation */
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
         }
       `}</style>
     </div>
