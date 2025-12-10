@@ -9,6 +9,7 @@ import StressRecoveryChallenge from './components/StressRecoveryChallenge'
 import TeamAlertsPanel from './components/TeamAlertsPanel'
 import SmartRecommendations from './components/SmartRecommendations'
 import HistoricCalendar from './components/HistoricCalendar'
+import StressAlertNotification from './components/StressAlertNotification'
 import mindMateLogo from '../Images/MindMateFinal.png'
 import './styles.css'
 
@@ -130,6 +131,7 @@ export default function App({ onLogout }){
           <BreathingExercise />
         </div>
         <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <StressAlertNotification userId={userId} refreshKey={refreshKey} />
           <button 
             onClick={handleClearData}
             style={{padding:'10px 14px',borderRadius:10,background:'#ff6b6b',color:'#fff',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px',boxShadow:'0 4px 12px rgba(255, 107, 107, 0.3)',transition:'all 0.3s ease',whiteSpace:'nowrap'}}
@@ -154,7 +156,7 @@ export default function App({ onLogout }){
       {activeTab === 'dashboard' && (
       <div className="app-grid">
         <div className="card">
-          <MoodInput onSaved={(e)=>{ setEntries(e); localStorage.setItem('mindmate_entries', JSON.stringify(e)); }} />
+          <MoodInput onSaved={(e)=>{ setEntries(e); localStorage.setItem('mindmate_entries', JSON.stringify(e)); setRefreshKey(prev => prev + 1); }} />
           <GoogleFitPanel entries={entries} />
         </div>
         <div className="card" style={{display:'flex',flexDirection:'column',overflow:'hidden'}}>

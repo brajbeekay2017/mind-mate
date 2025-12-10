@@ -7,6 +7,7 @@ export default function GoogleFitPanel({ entries = [] }) {
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tokenExpired, setTokenExpired] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [timePeriod, setTimePeriod] = useState('today'); // 'today' or '7days'
   const [sevenDayData, setSevenDayData] = useState(null);
@@ -94,8 +95,16 @@ export default function GoogleFitPanel({ entries = [] }) {
         fetch(`http://localhost:4000/google-fit/target-steps?accessToken=${accessToken}`)
       ]);
       
+      // If any response is 401, mark tokenExpired but do not remove token from storage.
+      if (stepsRes.status === 401 || heartRes.status === 401 || targetRes.status === 401) {
+        console.warn('[GoogleFitPanel] Received 401 from Google Fit endpoints - token may be expired');
+        setTokenExpired(true);
+        setError('Google Fit authorization expired. Click Reconnect to re-authorize (token will be kept until you explicitly disconnect).');
+        // still attempt to parse responses if available, but avoid removing token
+      }
       if (!stepsRes.ok || !heartRes.ok || !targetRes.ok) {
-        throw new Error('Failed to fetch one or more metrics');
+        // If non-auth related failure, surface a generic error but keep token as well
+        if (!tokenExpired) throw new Error('Failed to fetch one or more metrics');
       }
       
       const stepsData = await stepsRes.json();
@@ -116,10 +125,22 @@ export default function GoogleFitPanel({ entries = [] }) {
         setTargetSteps(targetData.data.targetSteps || 10000);
       }
       
+      // Store Google Fit data to localStorage for stress indicator
+      const googleFitLatest = {
+        stepsToday: stepsData.data?.steps || 0,
+        heartPoints: heartData.data?.heartPoints || 0,
+        heartMinutes: heartData.data?.heartMinutes || 0,
+        restingHeartRate: heartData.data?.restingHeartRate,
+        avgHeartRate: heartData.data?.avgHeartRate,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('googlefit_latest', JSON.stringify(googleFitLatest));
+      
       // Also fetch 7-day data for comparison
       await fetchSevenDayData(accessToken);
     } catch (err) {
       console.error('Failed to fetch Google Fit data:', err);
+      // Do not treat fetch errors as an immediate logout. Keep token until user disconnects.
       setError(`Data fetch error: ${err.message}`);
     } finally {
       setLoading(false);
@@ -147,6 +168,18 @@ export default function GoogleFitPanel({ entries = [] }) {
         steps: stepsData.data,
         heart: heartData.data
       });
+      
+      // Update localStorage with resting heart rate estimate (minimum daily average)
+      if (heartData.success && heartData.data?.dailyAverages?.length > 0) {
+        const dailyAverages = heartData.data.dailyAverages;
+        const minHeartRate = Math.min(...dailyAverages.map(d => d.average));
+        
+        // Update googlefit_latest with resting HR estimate
+        const googleFitLatest = JSON.parse(localStorage.getItem('googlefit_latest') || '{}');
+        googleFitLatest.restingHeartRate = minHeartRate;
+        googleFitLatest.avgHeartRate = Math.round(dailyAverages.reduce((sum, d) => sum + d.average, 0) / dailyAverages.length);
+        localStorage.setItem('googlefit_latest', JSON.stringify(googleFitLatest));
+      }
     } catch (err) {
       console.error('Failed to fetch 7-day data:', err);
     }

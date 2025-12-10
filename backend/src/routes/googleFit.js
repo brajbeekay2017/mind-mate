@@ -847,8 +847,8 @@ router.get('/monthly', async (req, res) => {
         userId: 'me',
         requestBody: {
           aggregateBy: [{
-            dataTypeName: 'com.google.heart_minutes',
-            dataSourceId: 'derived:com.google.heart_minutes:com.google.android.gms:merged'
+            dataTypeName: 'com.google.heart_minutes'
+            // Removed dataSourceId to let Google Fit pick the available source automatically
           }],
           bucketByTime: { durationMillis: 86400000 }, // 1 day
           startTimeMillis: startTime,
@@ -869,6 +869,111 @@ router.get('/monthly', async (req, res) => {
       }
     } catch (heartErr) {
       console.log('Heart points not available:', heartErr.message);
+    }
+
+    // Fetch heart rate data (resting heart rate and average heart rate)
+    try {
+      console.log('💓 [Monthly] Attempting to fetch heart rate data...');
+      const heartRateResponse = await fitness.users.dataset.aggregate({
+        userId: 'me',
+        requestBody: {
+          aggregateBy: [
+            { dataTypeName: 'com.google.heart_rate.bpm' }
+          ],
+          bucketByTime: { durationMillis: 86400000 }, // 1 day
+          startTimeMillis: startTime,
+          endTimeMillis: endTime
+        }
+      });
+      
+      console.log('💓 [Monthly] Heart rate response buckets:', heartRateResponse.data.bucket?.length || 0);
+      
+      if (heartRateResponse.data.bucket) {
+        heartRateResponse.data.bucket.forEach((bucket, idx) => {
+          const date = formatLocalDateKey(parseInt(bucket.startTimeMillis));
+          
+          if (bucket.dataset && bucket.dataset[0] && bucket.dataset[0].point && bucket.dataset[0].point.length > 0) {
+            const points = bucket.dataset[0].point;
+            let sumHR = 0;
+            let minHR = Infinity;
+            let maxHR = 0;
+            let validPoints = 0;
+            
+            points.forEach(point => {
+              const hr = point.value?.[0]?.fpVal || point.value?.[0]?.intVal;
+              if (hr !== undefined && hr > 0) {
+                sumHR += hr;
+                minHR = Math.min(minHR, hr);
+                maxHR = Math.max(maxHR, hr);
+                validPoints++;
+              }
+            });
+            
+            if (validPoints > 0) {
+              if (!dailyData[date]) {
+                dailyData[date] = {};
+              }
+              const avgHR = sumHR / validPoints;
+              // Resting HR is typically the minimum HR (at rest)
+              dailyData[date].restingHeartRate = Math.round(minHR);
+              dailyData[date].avgHeartRate = Math.round(avgHR);
+              console.log(`💓 [Monthly] ${date}: Resting=${Math.round(minHR)}, Avg=${Math.round(avgHR)}`);
+            }
+          }
+        });
+      }
+    } catch (hrErr) {
+      console.log('❌ [Monthly] Heart rate data not available:', hrErr.message);
+    }
+
+    // Fetch sleep data
+    try {
+      console.log('🛌 [Monthly] Attempting to fetch sleep data...');
+      const sleepResponse = await fitness.users.dataset.aggregate({
+        userId: 'me',
+        requestBody: {
+          aggregateBy: [{
+            dataTypeName: 'com.google.sleep.segment'
+          }],
+          bucketByTime: { durationMillis: 86400000 }, // 1 day
+          startTimeMillis: startTime,
+          endTimeMillis: endTime
+        }
+      });
+      
+      console.log('🛌 [Monthly] Sleep response buckets:', sleepResponse.data.bucket?.length || 0);
+      
+      if (sleepResponse.data.bucket) {
+        sleepResponse.data.bucket.forEach((bucket, idx) => {
+          const date = formatLocalDateKey(parseInt(bucket.startTimeMillis));
+          
+          if (bucket.dataset && bucket.dataset[0] && bucket.dataset[0].point) {
+            let totalSleepMinutes = 0;
+            
+            console.log(`🛌 [Monthly] Bucket ${idx} (${date}): ${bucket.dataset[0].point.length} sleep points`);
+            
+            bucket.dataset[0].point.forEach(point => {
+              if (point.startTimeNanos && point.endTimeNanos) {
+                const startNanos = parseInt(point.startTimeNanos);
+                const endNanos = parseInt(point.endTimeNanos);
+                const durationMinutes = (endNanos - startNanos) / (1000000 * 60); // Convert nanoseconds to minutes
+                totalSleepMinutes += durationMinutes;
+              }
+            });
+            
+            if (totalSleepMinutes > 0) {
+              if (!dailyData[date]) {
+                dailyData[date] = {};
+              }
+              dailyData[date].sleepMinutes = Math.round(totalSleepMinutes);
+              dailyData[date].sleepHours = (totalSleepMinutes / 60).toFixed(1);
+              console.log(`🛌 [Monthly] ${date}: ${dailyData[date].sleepHours} hours sleep`);
+            }
+          }
+        });
+      }
+    } catch (sleepErr) {
+      console.log('❌ [Monthly] Sleep data not available:', sleepErr.message);
     }
     
     res.json({

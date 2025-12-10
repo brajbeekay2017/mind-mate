@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs-extra');
 const detectStress = require('../services/stressDetector');
+const { generateChatReply } = require('../services/llm');
 
 const router = express.Router();
 const DATA_PATH = path.join(__dirname, '..', 'data', 'data.json');
@@ -82,7 +83,17 @@ router.post('/', async (req, res) => {
 
   const detection = detectStress(entries);
   const last10 = entries.slice(-10);
-  res.json({ detection, entries: last10 });
+  // Generate a brief empathetic reply using OpenAI
+  let aiReply = null;
+  try {
+    const recent = entries.slice(-5).map(e => `Mood ${e.mood}/4, Stress ${e.stress}/5${e.feeling ? `, ${e.feeling}` : ''} (${e.timestamp})`).join('\n');
+    const prompt = `User just saved a mood entry: mood ${mood}/4, stress ${stress}/5, feeling: ${feeling || 'none'}. Recent entries:\n${recent}\n\nPlease respond empathetically, validate their feeling, and suggest one small, actionable step (keep it concise).`;
+    aiReply = await generateChatReply(prompt, { provider: 'openai' });
+  } catch (err) {
+    console.error('AI reply generation failed:', err && err.message ? err.message : err);
+  }
+
+  res.json({ detection, entries: last10, aiReply });
 });
 
 // GET /mood - return last 10 entries for current user

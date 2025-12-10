@@ -35,7 +35,10 @@ function getUserData(allData, userId) {
 router.get('/', async (req, res) => {
   const allData = await readData();
   const entries = getUserData(allData, req.userId);
-  const last12 = entries.slice(-12);
+  const last12 = entries.slice(-10);
+  
+  console.log(`📊 [SUMMARY] User: ${req.userId}, Total entries: ${entries.length}, Using last 12: ${last12.length}`);
+  console.log(`📊 [SUMMARY] Last 10 entries:`, last12.map(e => ({ mood: e.mood, stress: e.stress, date: e.timestamp })));
   
   // Calculate mood and stress statistics
   const moodScores = last12.map(e => e.mood);
