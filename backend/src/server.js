@@ -34,6 +34,17 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const llm = require('./services/llm');
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    llmProvider: llm.getProviderInfo().activeProvider
+  });
+});
+
 app.use('/login', loginRouter);
 app.use('/mood', moodRouter);
 app.use('/chat', chatRouter);
