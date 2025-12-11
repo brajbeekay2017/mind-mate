@@ -95,34 +95,51 @@ if ($LASTEXITCODE -eq 0) {
 }
 Pop-Location
 
-Write-Host "`nStep 8: Setting up IIS..." -ForegroundColor Yellow
+Write-Host "`nStep 8: Deploying web.config files..." -ForegroundColor Yellow
+# Copy backend web.config
+Copy-Item -Path "$sourcePath\backend-web.config" -Destination "$backendPath\web.config" -Force
+Write-Host "  OK Backend web.config deployed" -ForegroundColor Green
+
+# Copy frontend web.config
+Copy-Item -Path "$sourcePath\frontend-web.config" -Destination "$frontendPath\web.config" -Force
+Write-Host "  OK Frontend web.config deployed" -ForegroundColor Green
+
+Write-Host "`nStep 9: Setting up IIS sites..." -ForegroundColor Yellow
 try {
     Import-Module WebAdministration -ErrorAction Stop
     
-    $siteName = "MindMate"
-    $existingSite = Get-Website -Name $siteName -ErrorAction SilentlyContinue
+    # Create application pool if needed
+    if (-not (Test-Path "IIS:\AppPools\MindMatePool")) {
+        New-WebAppPool -Name "MindMatePool" | Out-Null
+        Set-ItemProperty -Path "IIS:\AppPools\MindMatePool" -Name "managedRuntimeVersion" -Value ""
+        Write-Host "  OK Application pool created" -ForegroundColor Green
+    }
     
-    if ($existingSite) {
-        Write-Host "  Site '$siteName' already exists - updating..." -ForegroundColor Cyan
-        Set-ItemProperty "IIS:\Sites\$siteName" -Name physicalPath -Value $webRoot
-        Write-Host "  OK Site updated" -ForegroundColor Green
+    # Create/Update Frontend Site (mindmate.aapnainfotech.in)
+    $frontendSite = Get-Website -Name "MindMateFrontend" -ErrorAction SilentlyContinue
+    if ($frontendSite) {
+        Write-Host "  Frontend site exists - updating..." -ForegroundColor Cyan
+        Set-ItemProperty "IIS:\Sites\MindMateFrontend" -Name physicalPath -Value $frontendPath
     } else {
-        # Create application pool
-        if (-not (Test-Path "IIS:\AppPools\MindMatePool")) {
-            New-WebAppPool -Name "MindMatePool" | Out-Null
-            Set-ItemProperty -Path "IIS:\AppPools\MindMatePool" -Name "managedRuntimeVersion" -Value ""
-        }
-        
-        # Create website
-        New-Website -Name $siteName -Port 80 -HostHeader "mindmate.aapnainfotech.in" -PhysicalPath $webRoot -ApplicationPool "MindMatePool" | Out-Null
-        Write-Host "  OK IIS site created" -ForegroundColor Green
+        New-Website -Name "MindMateFrontend" -Port 80 -HostHeader "mindmate.aapnainfotech.in" -PhysicalPath $frontendPath -ApplicationPool "MindMatePool" | Out-Null
+        Write-Host "  OK Frontend site created (mindmate.aapnainfotech.in)" -ForegroundColor Green
+    }
+    
+    # Create/Update Backend API Site (mindmateapi.aapnainfotech.in)
+    $backendSite = Get-Website -Name "MindMateAPI" -ErrorAction SilentlyContinue
+    if ($backendSite) {
+        Write-Host "  Backend API site exists - updating..." -ForegroundColor Cyan
+        Set-ItemProperty "IIS:\Sites\MindMateAPI" -Name physicalPath -Value $backendPath
+    } else {
+        New-Website -Name "MindMateAPI" -Port 80 -HostHeader "mindmateapi.aapnainfotech.in" -PhysicalPath $backendPath -ApplicationPool "MindMatePool" | Out-Null
+        Write-Host "  OK Backend API site created (mindmateapi.aapnainfotech.in)" -ForegroundColor Green
     }
 }
 catch {
     Write-Host "  FAILED IIS setup failed: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-Write-Host "`nStep 9: Setting permissions..." -ForegroundColor Yellow
+Write-Host "`nStep 10: Setting permissions..." -ForegroundColor Yellow
 try {
     $acl = Get-Acl $webRoot
     $permission = "IIS_IUSRS","FullControl","ContainerInherit,ObjectInherit","None","Allow"
@@ -135,7 +152,7 @@ catch {
     Write-Host "  WARNING Could not set permissions: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
-Write-Host "`nStep 10: Restarting IIS..." -ForegroundColor Yellow
+Write-Host "`nStep 11: Restarting IIS..." -ForegroundColor Yellow
 iisreset /noforce 2>&1 | Out-Null
 Write-Host "  OK IIS restarted" -ForegroundColor Green
 
@@ -165,9 +182,16 @@ if (Test-Path "$frontendPath\dist\index.html") {
     Write-Host "  FAILED Frontend build missing" -ForegroundColor Red
 }
 
+Write-Host "`nIIS Sites:" -ForegroundColor Cyan
+Get-Website | Where-Object {$_.Name -match "MindMate"} | Format-Table Name, @{Label="Domain";Expression={$_.bindings.Collection.bindingInformation}}, PhysicalPath, State
+
 Write-Host "`n=== Next Steps ===" -ForegroundColor Yellow
-Write-Host "1. Update Google Cloud Console:" -ForegroundColor White
+Write-Host "1. Configure DNS A records:" -ForegroundColor White
+Write-Host "   mindmate.aapnainfotech.in -> Your Server IP" -ForegroundColor Cyan
+Write-Host "   mindmateapi.aapnainfotech.in -> Your Server IP" -ForegroundColor Cyan
+Write-Host "2. Update Google Cloud Console:" -ForegroundColor White
 Write-Host "   Authorized redirect URIs: https://mindmateapi.aapnainfotech.in/google-auth/callback" -ForegroundColor Cyan
 Write-Host "   Authorized JavaScript origins: https://mindmate.aapnainfotech.in" -ForegroundColor Cyan
-Write-Host "2. Test the site: https://mindmate.aapnainfotech.in" -ForegroundColor White
-Write-Host "3. Check browser console (F12) for any errors" -ForegroundColor White
+Write-Host "3. Test the sites:" -ForegroundColor White
+Write-Host "   Frontend: https://mindmate.aapnainfotech.in" -ForegroundColor Cyan
+Write-Host "   Backend API: https://mindmateapi.aapnainfotech.in/health" -ForegroundColor Cyan

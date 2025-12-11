@@ -45,6 +45,17 @@ app.use('/team-alerts', teamAlertsRouter);
 app.use('/recommendations', recommendationsRouter);
 app.use('/alerts', stressAlertsRouter);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const llm = require('./services/llm');
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    llmProvider: llm.getProviderInfo().activeProvider
+  });
+});
+
 // Root handler for health check and OAuth callback
 app.get('/', (req, res) => {
   // If there's a code query parameter, it's the Google OAuth callback
