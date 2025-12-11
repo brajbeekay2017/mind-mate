@@ -7,7 +7,7 @@ Write-Host "=== Mind Mate Deployment Script ===" -ForegroundColor Cyan
 $webRoot = "C:\inetpub\Mindmate\Web"
 $backendPath = "$webRoot\backend"
 $frontendPath = "$webRoot\frontend"
-$sourcePath = "C:\Users\aksingh\Desktop\mind-mate"  # Update this with your actual source path
+$sourcePath = "C:\Users\azureadmin\Desktop\mind-mate"  # Update this with your actual source path
 
 Write-Host "`nStep 1: Creating directory structure..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Path $webRoot -Force | Out-Null

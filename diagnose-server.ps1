@@ -1,5 +1,5 @@
 # Mind Mate Server Diagnostic Script
-# Run this on your production server to troubleshoot issues
+# Run this on your production server (as azureadmin) to troubleshoot issues
 
 Write-Host "=== Mind Mate Server Diagnostic ===" -ForegroundColor Cyan
 
