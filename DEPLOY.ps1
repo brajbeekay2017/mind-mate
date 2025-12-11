@@ -143,11 +143,6 @@ $frontendWebConfig = @'
         <add value="index.html" />
       </files>
     </defaultDocument>
-    <staticContent>
-      <mimeMap fileExtension=".json" mimeType="application/json" />
-      <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
-      <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
-    </staticContent>
     <httpProtocol>
       <customHeaders>
         <add name="Access-Control-Allow-Origin" value="*" />
@@ -175,14 +170,14 @@ Import-Module WebAdministration
 }
 
 # Configure Frontend site
-if (Get-Website -Name 'MindMateFrontend' -ErrorAction SilentlyContinue) {
-    Set-ItemProperty "IIS:\Sites\MindMateFrontend" -Name physicalPath -Value $frontendDest
-    Write-Host "  ? Updated MindMateFrontend" -ForegroundColor Green
+if (Get-Website -Name 'Mindmate' -ErrorAction SilentlyContinue) {
+    Set-ItemProperty "IIS:\Sites\Mindmate" -Name physicalPath -Value $frontendDest
+    Write-Host "  ? Updated Mindmate" -ForegroundColor Green
 } else {
-    New-Website -Name 'MindMateFrontend' -PhysicalPath $frontendDest -Port 80 -HostHeader 'mindmate.aapnainfotech.in' -Force
-    Write-Host "  ? Created MindMateFrontend" -ForegroundColor Green
+    New-Website -Name 'Mindmate' -PhysicalPath $frontendDest -Port 80 -HostHeader 'mindmate.aapnainfotech.in' -Force
+    Write-Host "  ? Created Mindmate" -ForegroundColor Green
 }
-Start-Website -Name 'MindMateFrontend'
+Start-Website -Name 'Mindmate'
 
 # Configure Backend site
 if (Get-Website -Name 'MindmateAPI' -ErrorAction SilentlyContinue) {
