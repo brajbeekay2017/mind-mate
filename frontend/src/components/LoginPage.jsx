@@ -192,6 +192,17 @@ export default function LoginPage({ onLogin }) {
           Sign in with your Google account to get started.<br />
           Your wellness data will be automatically connected to Google Fit.
         </p>
+
+        <div style={{
+          marginTop: '24px',
+          paddingTop: '16px',
+          borderTop: '1px solid #eee',
+          fontSize: '12px'
+        }}>
+          <a href="http://localhost:4000/privacy" target="_blank" rel="noopener noreferrer" style={{color: '#667eea', textDecoration: 'none', cursor: 'pointer'}}>
+            Privacy Policy
+          </a>
+        </div>
       </div>
     </div>
   )
