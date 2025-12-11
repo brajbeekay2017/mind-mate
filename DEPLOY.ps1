@@ -242,16 +242,16 @@ Write-Host ""
 Write-Host "Testing URLs:" -ForegroundColor Yellow
 try {
     $frontendTest = Invoke-WebRequest -Uri "http://localhost" -Headers @{Host='mindmate.aapnainfotech.in'} -UseBasicParsing -TimeoutSec 10
-    Write-Host "  ✓ Frontend: HTTP $($frontendTest.StatusCode)" -ForegroundColor Green
+    Write-Host "  Frontend: HTTP $($frontendTest.StatusCode)" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Frontend: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  Frontend: Error - $($_.Exception.Message)" -ForegroundColor Red
 }
 
 try {
     $backendTest = Invoke-WebRequest -Uri "http://localhost/health" -Headers @{Host='mindmateapi.aapnainfotech.in'} -UseBasicParsing -TimeoutSec 10
-    Write-Host "  ✓ Backend: HTTP $($backendTest.StatusCode)" -ForegroundColor Green
+    Write-Host "  Backend: HTTP $($backendTest.StatusCode)" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Backend: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  Backend: Error - $($_.Exception.Message)" -ForegroundColor Red
 }
 
 Write-Host ""
@@ -259,5 +259,5 @@ Write-Host "=== Deployment Complete ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "URLs:" -ForegroundColor Yellow
 Write-Host "  Frontend: http://mindmate.aapnainfotech.in" -ForegroundColor Cyan
-Write-Host "  Backend:  http://mindmateapi.aapnainfotech.in/health" -ForegroundColor Cyan
+Write-Host "  Backend: http://mindmateapi.aapnainfotech.in/health" -ForegroundColor Cyan
 Write-Host ""
