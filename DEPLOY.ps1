@@ -12,7 +12,7 @@ cd C:\Users\azureadmin\Desktop\mind-mate
 git fetch origin
 git checkout production-deployment
 git pull origin production-deployment
-Write-Host "  ✓ Code updated" -ForegroundColor Green
+Write-Host "  ? Code updated" -ForegroundColor Green
 
 # Step 2: Build frontend
 Write-Host ""
@@ -20,31 +20,31 @@ Write-Host "Step 2: Building frontend..." -ForegroundColor Yellow
 cd C:\Users\azureadmin\Desktop\mind-mate\frontend
 npm install
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "  ✗ npm install failed!" -ForegroundColor Red
+    Write-Host "  ? npm install failed!" -ForegroundColor Red
     exit 1
 }
 npm run build
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "  ✗ npm build failed!" -ForegroundColor Red
+    Write-Host "  ? npm build failed!" -ForegroundColor Red
     exit 1
 }
-Write-Host "  ✓ Frontend built" -ForegroundColor Green
+Write-Host "  ? Frontend built" -ForegroundColor Green
 
 # Step 3: Verify build exists
 Write-Host ""
 Write-Host "Step 3: Verifying build..." -ForegroundColor Yellow
 if (-not (Test-Path "C:\Users\azureadmin\Desktop\mind-mate\frontend\dist\index.html")) {
-    Write-Host "  ✗ Build failed - index.html not found!" -ForegroundColor Red
+    Write-Host "  ? Build failed - index.html not found!" -ForegroundColor Red
     exit 1
 }
-Write-Host "  ✓ Build verified" -ForegroundColor Green
+Write-Host "  ? Build verified" -ForegroundColor Green
 
 # Step 4: Stop backend
 Write-Host ""
 Write-Host "Step 4: Stopping backend..." -ForegroundColor Yellow
 pm2 stop mindmate-backend -ErrorAction SilentlyContinue
 pm2 delete mindmate-backend -ErrorAction SilentlyContinue
-Write-Host "  ✓ Backend stopped" -ForegroundColor Green
+Write-Host "  ? Backend stopped" -ForegroundColor Green
 
 # Step 5: Deploy frontend
 Write-Host ""
@@ -57,7 +57,7 @@ if (-not (Test-Path $frontendDest)) {
 Copy-Item -Path "C:\Users\azureadmin\Desktop\mind-mate\frontend\*" -Destination $frontendDest -Recurse -Force
 # Copy dist contents to root for serving
 Copy-Item -Path "$frontendDest\dist\*" -Destination $frontendDest -Recurse -Force
-Write-Host "  ✓ Frontend deployed" -ForegroundColor Green
+Write-Host "  ? Frontend deployed" -ForegroundColor Green
 
 # Step 6: Deploy backend
 Write-Host ""
@@ -70,7 +70,7 @@ if (-not (Test-Path $backendDest)) {
 Get-ChildItem -Path $backendDest -Exclude node_modules | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 # Copy new files
 Copy-Item -Path "C:\Users\azureadmin\Desktop\mind-mate\backend\*" -Destination $backendDest -Recurse -Force -Exclude node_modules
-Write-Host "  ✓ Backend deployed" -ForegroundColor Green
+Write-Host "  ? Backend deployed" -ForegroundColor Green
 
 # Step 7: Install backend dependencies
 Write-Host ""
@@ -78,10 +78,10 @@ Write-Host "Step 7: Installing backend dependencies..." -ForegroundColor Yellow
 cd $backendDest
 npm install --production
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "  ✗ npm install failed!" -ForegroundColor Red
+    Write-Host "  ? npm install failed!" -ForegroundColor Red
     exit 1
 }
-Write-Host "  ✓ Backend dependencies installed" -ForegroundColor Green
+Write-Host "  ? Backend dependencies installed" -ForegroundColor Green
 
 # Step 8: Create/update web.config files
 Write-Host ""
@@ -159,7 +159,7 @@ $frontendWebConfig = @'
 </configuration>
 '@
 $frontendWebConfig | Out-File -FilePath "$frontendDest\web.config" -Encoding UTF8 -Force
-Write-Host "  ✓ web.config files created" -ForegroundColor Green
+Write-Host "  ? web.config files created" -ForegroundColor Green
 
 # Step 9: Configure IIS sites
 Write-Host ""
@@ -177,20 +177,20 @@ Import-Module WebAdministration
 # Configure Frontend site
 if (Get-Website -Name 'MindMateFrontend' -ErrorAction SilentlyContinue) {
     Set-ItemProperty "IIS:\Sites\MindMateFrontend" -Name physicalPath -Value $frontendDest
-    Write-Host "  ✓ Updated MindMateFrontend" -ForegroundColor Green
+    Write-Host "  ? Updated MindMateFrontend" -ForegroundColor Green
 } else {
     New-Website -Name 'MindMateFrontend' -PhysicalPath $frontendDest -Port 80 -HostHeader 'mindmate.aapnainfotech.in' -Force
-    Write-Host "  ✓ Created MindMateFrontend" -ForegroundColor Green
+    Write-Host "  ? Created MindMateFrontend" -ForegroundColor Green
 }
 Start-Website -Name 'MindMateFrontend'
 
 # Configure Backend site
 if (Get-Website -Name 'MindmateAPI' -ErrorAction SilentlyContinue) {
     Set-ItemProperty "IIS:\Sites\MindmateAPI" -Name physicalPath -Value $backendDest
-    Write-Host "  ✓ Updated MindmateAPI" -ForegroundColor Green
+    Write-Host "  ? Updated MindmateAPI" -ForegroundColor Green
 } else {
     New-Website -Name 'MindmateAPI' -PhysicalPath $backendDest -Port 80 -HostHeader 'mindmateapi.aapnainfotech.in' -Force
-    Write-Host "  ✓ Created MindmateAPI" -ForegroundColor Green
+    Write-Host "  ? Created MindmateAPI" -ForegroundColor Green
 }
 Start-Website -Name 'MindmateAPI'
 
@@ -202,7 +202,7 @@ $permission = "IIS_IUSRS", "ReadAndExecute", "ContainerInherit,ObjectInherit", "
 $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
 $acl.SetAccessRule($accessRule)
 Set-Acl "C:\inetpub\Mindmate\Web" $acl
-Write-Host "  ✓ Permissions set" -ForegroundColor Green
+Write-Host "  ? Permissions set" -ForegroundColor Green
 
 # Step 11: Start backend with PM2
 Write-Host ""
@@ -210,14 +210,14 @@ Write-Host "Step 11: Starting backend..." -ForegroundColor Yellow
 cd $backendDest
 pm2 start src\server.js --name mindmate-backend
 pm2 save
-Write-Host "  ✓ Backend started on port 4000" -ForegroundColor Green
+Write-Host "  ? Backend started on port 4000" -ForegroundColor Green
 
 # Step 12: Restart IIS
 Write-Host ""
 Write-Host "Step 12: Restarting IIS..." -ForegroundColor Yellow
 iisreset /noforce
 Start-Sleep -Seconds 3
-Write-Host "  ✓ IIS restarted" -ForegroundColor Green
+Write-Host "  ? IIS restarted" -ForegroundColor Green
 
 # Step 13: Verify deployment
 Write-Host ""
