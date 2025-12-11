@@ -257,7 +257,7 @@ try {
 Write-Host ""
 Write-Host "=== Deployment Complete ===" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "URLs:" -ForegroundColor Yellow
+Write-Host "Access your application at:" -ForegroundColor Yellow
 Write-Host "  Frontend: http://mindmate.aapnainfotech.in" -ForegroundColor Cyan
-Write-Host "  Backend: http://mindmateapi.aapnainfotech.in/health" -ForegroundColor Cyan
+Write-Host "  Backend API: http://mindmateapi.aapnainfotech.in/health" -ForegroundColor Cyan
 Write-Host ""
