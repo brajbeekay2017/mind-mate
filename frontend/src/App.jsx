@@ -11,6 +11,7 @@ import SmartRecommendations from './components/SmartRecommendations'
 import HistoricCalendar from './components/HistoricCalendar'
 import StressAlertNotification from './components/StressAlertNotification'
 import mindMateLogo from '../Images/MindMateFinal.png'
+import { API_URL } from './config'
 import './styles.css'
 
 export default function App({ onLogout }){
@@ -46,7 +47,7 @@ export default function App({ onLogout }){
         setUserName(user.name || user.email || 'User');
         setIsAdmin(user.isAdmin || false);
         
-        const res = await fetch(`http://localhost:4000/mood?userId=${uid}`);
+        const res = await fetch(`${API_URL}/mood?userId=${uid}`);
         if(res.ok){
           const data = await res.json();
           setEntries(data.entries || []);
@@ -104,7 +105,7 @@ export default function App({ onLogout }){
       const uid = user.userId;
       
       // Call backend to clear data
-      const res = await fetch(`http://localhost:4000/mood/clear?userId=${uid}`, {
+      const res = await fetch(`${API_URL}/mood/clear?userId=${uid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: uid })
