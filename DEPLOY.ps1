@@ -100,13 +100,6 @@ $backendWebConfig = @'
         </rule>
       </rules>
     </rewrite>
-    <httpProtocol>
-      <customHeaders>
-        <add name="Access-Control-Allow-Origin" value="*" />
-        <add name="Access-Control-Allow-Methods" value="GET, POST, PUT, DELETE, OPTIONS" />
-        <add name="Access-Control-Allow-Headers" value="Content-Type, Authorization" />
-      </customHeaders>
-    </httpProtocol>
   </system.webServer>
 </configuration>
 '@
