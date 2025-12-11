@@ -138,11 +138,14 @@ export default function BreathingExercise(){
         fontSize: '12px',
         color: '#999',
         textAlign: 'center',
-        maxWidth: '420px',
-        fontStyle: 'italic',
+        // ✅ FIXED: Prevent text wrapping
         whiteSpace: 'nowrap',
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
+        fontStyle: 'italic',
+        lineHeight: '1.5',
+        letterSpacing: '0.3px',
+        padding: '0 12px'
       }}>
         Follow the expanding and contracting circle. This 5-4-5 breathing technique helps calm your nervous system.
       </div>
