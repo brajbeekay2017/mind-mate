@@ -135,12 +135,86 @@ export default function App({ onLogout }){
           <h2 style={{margin:'12px 0 0 0',fontSize:'20px',fontWeight:'400',fontFamily:"'Segoe Print', 'Comic Sans MS', cursive, sans-serif",letterSpacing:'1px',background:'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',fontStyle:'italic',animation:'emboss-pulse 2s ease-in-out infinite'}}>Mind Mate</h2>
         </div>
         <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flex:1}}>
-          <div style={{paddingLeft:'5%',display:'flex',justifyContent:'center',gap:8,marginBottom:12,flexShrink:0}}>
-            <button onClick={() => setActiveTab('dashboard')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'dashboard' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'dashboard' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Dashboard</button>
-            <button onClick={() => setActiveTab('calendar')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'calendar' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'calendar' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>📅 Calendar</button>
-            <button onClick={() => setActiveTab('recovery')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'recovery' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'recovery' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Recovery</button>
-            <button onClick={() => setActiveTab('recommendations')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'recommendations' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'recommendations' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Recommendations</button>
-            {isAdmin && <button onClick={() => setActiveTab('alerts')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'alerts' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'alerts' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Alerts</button>}
+          <div style={{paddingLeft:'5%',display:'flex',justifyContent:'center',gap:8,marginBottom:12,flexShrink:0,flexWrap:'wrap'}}>
+            {[
+              { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+              { id: 'calendar', icon: '📅', label: 'Calendar' },
+              { id: 'recovery', icon: '🚀', label: 'Recovery' },
+              { id: 'recommendations', icon: '💡', label: 'Tips' },
+              { id: 'alerts', icon: '🚨', label: 'Alerts', adminOnly: true }
+            ].filter(tab => !tab.adminOnly || isAdmin).map(tab => (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                title={tab.label}
+                style={{
+                  padding: '10px 16px',
+                  borderRadius: 10,
+                  background: activeTab === tab.id 
+                    ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)'
+                    : '#f0f0f0',
+                  color: activeTab === tab.id ? '#fff' : '#666',
+                  border: activeTab === tab.id ? '2px solid rgba(111, 168, 241, 0.3)' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontWeight: activeTab === tab.id ? '700' : '500',
+                  fontSize: '13px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: activeTab === tab.id ? '0 6px 20px rgba(111, 168, 241, 0.3)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  whiteSpace: 'nowrap',
+                  // ✅ CRITICAL FIX: Prevent text selection
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  // ✅ Prevent default focus outline
+                  outline: 'none',
+                  // ✅ Smooth transition for all properties
+                  WebkitTapHighlightColor: 'transparent'
+                }}
+                onMouseDown={(e) => {
+                  // ✅ Prevent text selection on mouse down
+                  e.preventDefault();
+                }}
+                onMouseOver={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(111, 168, 241, 0.15) 0%, rgba(79, 209, 197, 0.15) 100%)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(111, 168, 241, 0.15)';
+                  } else {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(111, 168, 241, 0.4)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.currentTarget.style.background = '#f0f0f0';
+                    e.currentTarget.style.boxShadow = 'none';
+                  } else {
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(111, 168, 241, 0.3)';
+                  }
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                onMouseUp={(e) => {
+                  // ✅ Prevent text selection on mouse up
+                  e.preventDefault();
+                }}
+                onFocus={(e) => {
+                  // ✅ Custom focus style instead of browser default
+                  e.currentTarget.style.outline = '3px solid rgba(79, 209, 197, 0.4)';
+                  e.currentTarget.style.outlineOffset = '2px';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.outline = 'none';
+                }}
+              >
+                <span style={{fontSize:'16px'}}>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
           <div style={{width:'100%',display:'flex',justifyContent:'center'}}>
             <BreathingExercise />

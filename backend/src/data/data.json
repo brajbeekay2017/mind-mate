@@ -1254,48 +1254,6 @@
       "completedChallenges": [],
       "moodEntries": [
         {
-          "mood": 4,
-          "stress": 1,
-          "feeling": "stressed",
-          "context": "challenge-completion",
-          "dayCompleted": 1,
-          "timestamp": "2025-12-10T14:57:38.589Z"
-        },
-        {
-          "mood": 4,
-          "stress": 1,
-          "feeling": "stressed",
-          "context": "challenge-completion",
-          "dayCompleted": 1,
-          "timestamp": "2025-12-10T14:57:40.625Z"
-        }
-      ]
-    },
-    "amiteshsinghsmsit": {
-      "completedChallenges": [],
-      "moodEntries": [
-        {
-          "mood": 4,
-          "stress": 4,
-          "feeling": "neutral",
-          "context": "manual",
-          "dayCompleted": null,
-          "timestamp": "2025-12-10T17:40:56.815Z"
-        },
-        {
-          "mood": 0,
-          "stress": 0,
-          "feeling": "neutral",
-          "context": "manual",
-          "dayCompleted": null,
-          "timestamp": "2025-12-10T17:41:05.876Z"
-        }
-      ]
-    },
-    "user": {
-      "completedChallenges": [],
-      "moodEntries": [
-        {
           "mood": 3,
           "stress": 3,
           "feeling": "neutral",
@@ -1448,6 +1406,72 @@
           "timestamp": "2025-12-10T16:37:16.173Z"
         }
       ]
+    },
+    "amiteshsinghsmsit": {
+      "completedChallenges": [],
+      "moodEntries": [
+        {
+          "mood": 4,
+          "stress": 4,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T17:40:56.815Z"
+        },
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-10T17:41:05.876Z"
+        }
+      ]
+    },
+    "brajbeekay": {
+      "completedChallenges": [],
+      "moodEntries": [
+        {
+          "mood": 0,
+          "stress": 0,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-11T12:36:11.517Z"
+        },
+        {
+          "mood": 1,
+          "stress": 1,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-11T12:36:15.898Z"
+        },
+        {
+          "mood": 2,
+          "stress": 2,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-11T12:36:20.091Z"
+        },
+        {
+          "mood": 3,
+          "stress": 3,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-11T12:36:46.732Z"
+        },
+        {
+          "mood": 1,
+          "stress": 1,
+          "feeling": "neutral",
+          "context": "manual",
+          "dayCompleted": null,
+          "timestamp": "2025-12-11T12:37:20.476Z"
+        }
+      ]
     }
   },
   "amiteshsinghsmsit": [
@@ -1466,6 +1490,48 @@
       "context": "manual",
       "dayCompleted": null,
       "timestamp": "2025-12-10T17:41:05.876Z"
+    }
+  ],
+  "brajbeekay": [
+    {
+      "mood": 0,
+      "stress": 0,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-11T12:36:11.517Z"
+    },
+    {
+      "mood": 1,
+      "stress": 1,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-11T12:36:15.898Z"
+    },
+    {
+      "mood": 2,
+      "stress": 2,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-11T12:36:20.091Z"
+    },
+    {
+      "mood": 3,
+      "stress": 3,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-11T12:36:46.732Z"
+    },
+    {
+      "mood": 1,
+      "stress": 1,
+      "feeling": "neutral",
+      "context": "manual",
+      "dayCompleted": null,
+      "timestamp": "2025-12-11T12:37:20.476Z"
     }
   ]
 }
