@@ -200,7 +200,7 @@ export default function LoginPage({ onLogin }) {
           borderTop: '1px solid #eee',
           fontSize: '12px'
         }}>
-          <a href="https://mindmate.aapnainfotech.in/privacy" target="_blank" rel="noopener noreferrer" style={{color: '#667eea', textDecoration: 'none', cursor: 'pointer'}}>
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{color: '#667eea', textDecoration: 'none', cursor: 'pointer'}}>
             Privacy Policy
           </a>
         </div>
