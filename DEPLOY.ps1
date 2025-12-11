@@ -123,10 +123,6 @@ $frontendWebConfig = @'
           <match url="^assets/(.*)$" />
           <action type="Rewrite" url="assets/{R:1}" />
         </rule>
-        <rule name="Images" stopProcessing="true">
-          <match url="^Images/(.*)$" />
-          <action type="Rewrite" url="Images/{R:1}" />
-        </rule>
         <rule name="React Router SPA" stopProcessing="true">
           <match url=".*" />
           <conditions logicalGrouping="MatchAll">
@@ -143,11 +139,6 @@ $frontendWebConfig = @'
         <add value="index.html" />
       </files>
     </defaultDocument>
-    <staticContent>
-      <mimeMap fileExtension=".json" mimeType="application/json" />
-      <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
-      <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
-    </staticContent>
     <httpProtocol>
       <customHeaders>
         <add name="Access-Control-Allow-Origin" value="*" />
@@ -167,7 +158,7 @@ Write-Host "Step 9: Configuring IIS sites..." -ForegroundColor Yellow
 Import-Module WebAdministration
 
 # Stop old conflicting sites
-@('Mindmate', 'Default Web Site') | ForEach-Object {
+@('MindMateFrontend', 'Default Web Site') | ForEach-Object {
     if (Get-Website -Name $_ -ErrorAction SilentlyContinue) {
         Stop-Website -Name $_ -ErrorAction SilentlyContinue
         Write-Host "  - Stopped: $_" -ForegroundColor Gray
@@ -175,14 +166,14 @@ Import-Module WebAdministration
 }
 
 # Configure Frontend site
-if (Get-Website -Name 'MindMateFrontend' -ErrorAction SilentlyContinue) {
-    Set-ItemProperty "IIS:\Sites\MindMateFrontend" -Name physicalPath -Value $frontendDest
-    Write-Host "  ? Updated MindMateFrontend" -ForegroundColor Green
+if (Get-Website -Name 'Mindmate' -ErrorAction SilentlyContinue) {
+    Set-ItemProperty "IIS:\Sites\Mindmate" -Name physicalPath -Value $frontendDest
+    Write-Host "  ? Updated Mindmate" -ForegroundColor Green
 } else {
-    New-Website -Name 'MindMateFrontend' -PhysicalPath $frontendDest -Port 80 -HostHeader 'mindmate.aapnainfotech.in' -Force
-    Write-Host "  ? Created MindMateFrontend" -ForegroundColor Green
+    New-Website -Name 'Mindmate' -PhysicalPath $frontendDest -Port 80 -HostHeader 'mindmate.aapnainfotech.in' -Force
+    Write-Host "  ? Created Mindmate" -ForegroundColor Green
 }
-Start-Website -Name 'MindMateFrontend'
+Start-Website -Name 'Mindmate'
 
 # Configure Backend site
 if (Get-Website -Name 'MindmateAPI' -ErrorAction SilentlyContinue) {
@@ -232,7 +223,7 @@ Write-Host "  Backend web.config:  $(Test-Path "$backendDest\web.config")" -Fore
 
 Write-Host ""
 Write-Host "IIS Sites:" -ForegroundColor Yellow
-Get-Website | Where-Object { $_.Name -like '*MindMate*' } | Format-Table Name, State, @{Label="Binding";Expression={$_.bindings.Collection.bindingInformation}} -AutoSize
+Get-Website | Where-Object { $_.Name -like '*Mindmate*' } | Format-Table Name, State, @{Label="Binding";Expression={$_.bindings.Collection.bindingInformation}} -AutoSize
 
 Write-Host ""
 Write-Host "PM2 Status:" -ForegroundColor Yellow
