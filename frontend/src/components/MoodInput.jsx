@@ -75,7 +75,55 @@ export default function MoodInput({ onSaved }){
       </div>
       <div style={{marginBottom:12}}>
         <label htmlFor="stress-range" style={{display:'block',marginBottom:6}}>Stress Level: <strong>{STRESS_LABELS[stress]}</strong></label>
-        <input id="stress-range" aria-label="Stress level" type="range" min="0" max="4" value={stress} onChange={e=>handleStressChange(e.target.value)} style={{width:'100%'}} />
+        <input
+          id="stress-range"
+          aria-label="Stress level"
+          type="range"
+          min="0"
+          max="4"
+          value={stress}
+          onChange={e=>handleStressChange(e.target.value)}
+          style={{
+            width:'100%',
+            accentColor: accent,
+            cursor:'pointer',
+            height:'6px'
+          }}
+        />
+        <style>{`
+          #stress-range {
+            appearance: none;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #2E8B57 0%, #7ED957 25%, #6FA8F1 50%, #FFA07A 75%, #FF6B6B 100%);
+            outline: none;
+            border-radius: 5px;
+          }
+          #stress-range::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: ${accent};
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 220ms ease;
+          }
+          #stress-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: ${accent};
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 220ms ease;
+          }
+          #stress-range::-moz-range-track {
+            background: transparent;
+            border: none;
+          }
+        `}</style>
       </div>
       <button onClick={submit} disabled={saving} aria-disabled={saving} style={{width:'100%',padding:'10px 12px',borderRadius:6,background: saving ? '#ccc' : accent,color:'#fff',border:'none',cursor:'pointer',fontWeight:600,transition:'background 220ms ease'}}>{saving ? 'Saving...' : 'Save'}</button>
     </div>
