@@ -31,7 +31,15 @@ const recommendationsRouter = require('./routes/recommendations');
 const stressAlertsRouter = require('./routes/stressAlerts');
 
 const app = express();
-app.use(cors());
+
+// Configure CORS explicitly to prevent duplicates
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 app.use('/login', loginRouter);
