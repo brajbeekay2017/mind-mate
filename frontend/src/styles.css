@@ -7,14 +7,14 @@ body {
   overflow: hidden;
 }
 
+/* ✅ NEW: Smooth transitions throughout */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
 /* Hide scrollbar while keeping functionality */
 ::-webkit-scrollbar {
   width: 6px;
-}
-
-* {
-  -ms-overflow-style: thin-scrollbar;
-  scrollbar-width: thin;
 }
 
 ::-webkit-scrollbar-track {
@@ -33,27 +33,24 @@ body {
 .app-grid { 
   display:grid; 
   grid-template-columns: 300px 1fr 320px; 
+  height:100vh;
   gap:16px; 
   padding:20px;
   overflow: hidden;
   flex: 1;
-  height: 100%;
 }
 
-/* Left panel scrollable */
 .app-grid > div:nth-child(1) {
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* Center panel (chat) - flex layout with fixed input */
 .app-grid > div:nth-child(2) {
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Right panel scrollable */
 .app-grid > div:nth-child(3) {
   overflow-y: auto;
   overflow-x: hidden;
@@ -65,8 +62,179 @@ body {
   box-shadow: 0 8px 24px rgba(111, 168, 241, 0.12); 
   padding:16px;
   border: 1px solid rgba(207, 216, 237, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ✅ NEW: Card hover effect */
+.card:hover {
+  box-shadow: 0 12px 32px rgba(111, 168, 241, 0.18);
+  border-color: rgba(111, 168, 241, 0.5);
+  transform: translateY(-2px);
+}
+
+.card p {
+  color: #586069;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.card h4 { 
+  margin: 0 0 12px 0; 
+  font-family: 'Poppins', system-ui, sans-serif; 
+  color: #0F4761;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(111, 168, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ✅ NEW: Accessible focus styles */
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 3px solid rgba(79, 209, 197, 0.4);
+  outline-offset: 2px;
+}
+
+/* ✅ NEW: Prevent focus outline style flashing */
+button:focus-visible {
+  outline: 3px solid rgba(79, 209, 197, 0.4);
+  outline-offset: 2px;
+}
+
+/* ✅ NEW: Ensure active state shows properly */
+button[title]:active {
+  transform: scale(0.98);
+}
+
+/* Input field styling */
+input[type="range"] {
+  accent-color: #6FA8F1;
+  width: 100%;
+  cursor: pointer;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #D1E7F0;
+  color: #2C3E50;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+  background: #ffffff;
+  border-color: #6FA8F1;
+  box-shadow: 0 0 0 3px rgba(111, 168, 241, 0.1);
+}
+
+label {
+  color: #0F4761;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* ✅ NEW: Loading skeleton animation */
+@keyframes skeleton-loading {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 2s infinite;
+  border-radius: 8px;
+}
+
+/* ✅ NEW: Smooth transitions for list items */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✅ NEW: Empty state styling */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.empty-state-text {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .app-grid { 
+    grid-template-columns: 1fr; 
+  }
+  
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  }
+}
+
+/* Breathing animation */
 .circle { 
   animation: breathe 6s ease-in-out infinite; 
   width: 120px; 
@@ -87,125 +255,18 @@ body {
   100% { transform: scale(0.85); opacity: .8 } 
 }
 
-.card h4 { 
-  margin: 0 0 12px 0; 
-  font-family: 'Poppins', system-ui, sans-serif; 
-  color: #0F4761;
-  font-size: 16px;
-}
-
-.card p {
-  color: #586069;
-  line-height: 1.6;
-}
-
-button {
-  transition: all 0.3s ease;
-}
-
-button:hover {
-  box-shadow: 0 6px 20px rgba(111, 168, 241, 0.2);
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-/* Accessible focus styles */
-button:focus, input:focus, select:focus, textarea:focus {
-  outline: 3px solid rgba(79, 209, 197, 0.4);
-  outline-offset: 2px;
-}
-
-/* Input field styling */
-input[type="range"] {
-  accent-color: #6FA8F1;
-  width: 100%;
-  cursor: pointer;
-}
-
-input[type="text"],
-input[type="email"],
-textarea {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid #D1E7F0;
-  color: #2C3E50;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-textarea:focus {
-  background: #ffffff;
-  border-color: #6FA8F1;
-  box-shadow: 0 0 0 3px rgba(111, 168, 241, 0.1);
-}
-
-/* Label styling */
-label {
-  color: #0F4761;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 6px;
-}
-
-/* responsive adjustments */
-@media (max-width: 900px) {
-  .app-grid { 
-    grid-template-columns: 1fr; 
-  }
-  
-  body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-  }
-}
-
-/* Smooth scrollbar */
-::-webkit-scrollbar {
-  display: none;
-}
-
-::-webkit-scrollbar-track {
-  display: none;
-}
-
-::-webkit-scrollbar-thumb {
-  display: none;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  display: none;
-}
-
 /* Logo styling */
 img[alt="Mind Mate"] {
   transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 4px 8px rgba(111, 168, 241, 0.15));
-}
-
-img[alt="Mind Mate"] {
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 4px 8px rgba(111, 168, 241, 0.15));
-  animation: logo-float 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(111, 168, 241, 0.2));
 }
 
 img[alt="Mind Mate"]:hover {
-  transform: scale(1.08);
-  filter: drop-shadow(0 8px 16px rgba(111, 168, 241, 0.35));
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(111, 168, 241, 0.3));
 }
 
-/* Floating animation for logo */
-@keyframes logo-float {
-  0%, 100% {
-    transform: translateY(0px);
-    filter: drop-shadow(0 4px 12px rgba(111, 168, 241, 0.2));
-  }
-  50% {
-    transform: translateY(-8px);
-    filter: drop-shadow(0 8px 20px rgba(111, 168, 241, 0.3));
-  }
-}
-
-/* Circular logo container with glowing animated border */
+/* Logo circle with glow */
 .logo-circle {
   width: 120px;
   height: 120px;
@@ -286,4 +347,23 @@ button[title="Clear all data and start fresh"]:hover {
 
 button[title="Clear all data and start fresh"]:active {
   transform: scale(0.98) !important;
+}
+
+/* ✅ NEW: Tab button specific styling */
+button[title="Dashboard"],
+button[title="Calendar"],
+button[title="Recovery"],
+button[title="Tips"],
+button[title="Alerts"] {
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ✅ NEW: Fix for Firefox */
+button::selection,
+button::-moz-selection {
+  background: transparent;
+  color: inherit;
 }
