@@ -21,7 +21,20 @@ export default function App({ onLogout }){
   const [refreshKey, setRefreshKey] = useState(0)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userId, setUserId] = useState(null)
+  const [userName, setUserName] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+
+  useEffect(()=>{
+    // Close profile menu when clicking outside
+    const handleClickOutside = (e) => {
+      if (showProfileMenu && !e.target.closest('#profile-menu-container')) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showProfileMenu]);
 
   useEffect(()=>{
     // load last 10 entries from backend, or from localStorage fallback
@@ -30,6 +43,7 @@ export default function App({ onLogout }){
         const user = JSON.parse(localStorage.getItem('mindmate_user') || '{}');
         const uid = user.userId;
         setUserId(uid);
+        setUserName(user.name || user.email || 'User');
         setIsAdmin(user.isAdmin || false);
         
         const res = await fetch(`http://localhost:4000/mood?userId=${uid}`);
@@ -121,7 +135,7 @@ export default function App({ onLogout }){
           <h2 style={{margin:'12px 0 0 0',fontSize:'20px',fontWeight:'400',fontFamily:"'Segoe Print', 'Comic Sans MS', cursive, sans-serif",letterSpacing:'1px',background:'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',fontStyle:'italic',animation:'emboss-pulse 2s ease-in-out infinite'}}>Mind Mate</h2>
         </div>
         <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flex:1}}>
-          <div style={{display:'flex',justifyContent:'center',gap:8,marginBottom:12,flexShrink:0}}>
+          <div style={{paddingLeft:'5%',display:'flex',justifyContent:'center',gap:8,marginBottom:12,flexShrink:0}}>
             <button onClick={() => setActiveTab('dashboard')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'dashboard' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'dashboard' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Dashboard</button>
             <button onClick={() => setActiveTab('calendar')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'calendar' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'calendar' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>📅 Calendar</button>
             <button onClick={() => setActiveTab('recovery')} style={{padding:'8px 12px',borderRadius:8,background: activeTab === 'recovery' ? 'linear-gradient(135deg, #6FA8F1 0%, #4FD1C5 100%)' : '#ddd',color: activeTab === 'recovery' ? '#fff' : '#333',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px'}}>Recovery</button>
@@ -134,24 +148,107 @@ export default function App({ onLogout }){
         </div>
         <div style={{display:'flex',gap:10,alignItems:'center',minWidth:'fit-content'}}>
           <StressAlertNotification userId={userId} refreshKey={refreshKey} />
-          <button 
-            onClick={handleClearData}
-            style={{padding:'10px 14px',borderRadius:10,background:'#ff6b6b',color:'#fff',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px',boxShadow:'0 4px 12px rgba(255, 107, 107, 0.3)',transition:'all 0.3s ease',whiteSpace:'nowrap'}}
-            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-            title="Clear all data and start fresh"
-          >
-            🗑️ Clear Data
-          </button>
-          <button 
-            onClick={onLogout}
-            style={{padding:'10px 14px',borderRadius:10,background:'#667eea',color:'#fff',border:'none',cursor:'pointer',fontWeight:'600',fontSize:'12px',boxShadow:'0 4px 12px rgba(102, 126, 234, 0.3)',transition:'all 0.3s ease',whiteSpace:'nowrap'}}
-            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-            title="Logout from Mind Mate"
-          >
-            🚪 Logout
-          </button>
+          
+          {/* Profile Menu */}
+          <div id="profile-menu-container" style={{position:'relative'}}>
+            <button 
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              style={{
+                padding:'10px 16px',
+                borderRadius:10,
+                background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color:'#fff',
+                border:'none',
+                cursor:'pointer',
+                fontWeight:'600',
+                fontSize:'13px',
+                boxShadow:'0 4px 12px rgba(102, 126, 234, 0.3)',
+                transition:'all 0.3s ease',
+                whiteSpace:'nowrap',
+                display:'flex',
+                alignItems:'center',
+                gap:8
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <span style={{fontSize:'18px',width:'24px',height:'24px',borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center'}}>👤</span>
+              <span>{userName || 'User'}</span>
+              <span style={{fontSize:'10px'}}>{showProfileMenu ? '▲' : '▼'}</span>
+            </button>
+            
+            {/* Dropdown Menu */}
+            {showProfileMenu && (
+              <div style={{
+                position:'absolute',
+                top:'100%',
+                right:0,
+                marginTop:8,
+                background:'#fff',
+                borderRadius:10,
+                boxShadow:'0 8px 24px rgba(0,0,0,0.15)',
+                minWidth:200,
+                overflow:'hidden',
+                zIndex:1000
+              }}>
+                <div style={{padding:'12px 16px',borderBottom:'1px solid #f0f0f0',fontSize:'12px',color:'#666',fontWeight:'600'}}>
+                  Welcome, {userName || 'User'}!
+                </div>
+                <button 
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    handleClearData();
+                  }}
+                  style={{
+                    width:'100%',
+                    padding:'12px 16px',
+                    background:'transparent',
+                    border:'none',
+                    textAlign:'left',
+                    cursor:'pointer',
+                    fontSize:'13px',
+                    fontWeight:'500',
+                    color:'#ff6b6b',
+                    display:'flex',
+                    alignItems:'center',
+                    gap:10,
+                    transition:'background 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#fff5f5'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span>🗑️</span>
+                  <span>Clear Data</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    onLogout();
+                  }}
+                  style={{
+                    width:'100%',
+                    padding:'12px 16px',
+                    background:'transparent',
+                    border:'none',
+                    textAlign:'left',
+                    cursor:'pointer',
+                    fontSize:'13px',
+                    fontWeight:'500',
+                    color:'#667eea',
+                    display:'flex',
+                    alignItems:'center',
+                    gap:10,
+                    transition:'background 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#f5f7ff'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span>🚪</span>
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
