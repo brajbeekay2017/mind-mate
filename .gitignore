@@ -1,19 +1,50 @@
-# Node
+# Dependencies
 node_modules/
-npm-debug.log*
-yarn-error.log*
-pnpm-lock.yaml
+frontend/node_modules/
+backend/node_modules/
 
-# React
-build/
-dist/
-
-# Environment
+# Environment files (CRITICAL - Never commit)
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env.local
 
-# IDE / OS
+# Build outputs
+frontend/dist/
+frontend/build/
+backend/dist/
+
+# Data files (contains user data)
+backend/src/data/data.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+backend/logs/
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+.cache/
+.parcel-cache/
+pnpm-lock.yaml
+
+# Test coverage
+coverage/
+
+# PM2
+.pm2/
