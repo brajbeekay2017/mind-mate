@@ -65,6 +65,18 @@ app.get('/callback', (req, res) => {
   res.redirect(`/google-auth/callback?code=${code}${state ? `&state=${state}` : ''}`);
 });
 
+// Privacy Policy route
+app.get('/privacy', (req, res) => {
+  const privacyPath = path.join(__dirname, '../../privacy.html');
+  fs.readFile(privacyPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(404).json({ error: 'Privacy policy not found' });
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(data);
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
