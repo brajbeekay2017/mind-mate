@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { API_URL } from '../config';
 
 const QUICK_PROMPTS = [
   "I'm overwhelmed by this sprint deadline",
@@ -75,7 +76,7 @@ export default function ChatPanel(){
     
     try{
       // Request Groq response
-      const res = await fetch('http://localhost:4000/chat', {
+      const res = await fetch(`${API_URL}/chat`, {
         method: 'POST', 
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ message: msg })

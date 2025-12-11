@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { API_URL } from '../config';
 
 export default function TeamAlertsPanel({ userId = 'user-1', teamId = 'team-1', isAdmin = false }){
   const [alerts, setAlerts] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(()=>{
-    const es = new EventSource(`http://localhost:4000/team-alerts/stream?userId=${encodeURIComponent(userId)}&teamId=${encodeURIComponent(teamId)}&isAdmin=${isAdmin ? '1' : '0'}`);
+    const es = new EventSource(`${API_URL}/team-alerts/stream?userId=${encodeURIComponent(userId)}&teamId=${encodeURIComponent(teamId)}&isAdmin=${isAdmin ? '1' : '0'}`);
     es.onmessage = (e) => {
       try{
         const payload = JSON.parse(e.data);
@@ -18,7 +19,7 @@ export default function TeamAlertsPanel({ userId = 'user-1', teamId = 'team-1', 
 
   async function postAlert(){
     if(!message.trim()) return;
-    await fetch('http://localhost:4000/team-alerts/alert', {
+    await fetch(`${API_URL}/team-alerts/alert`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ teamId, message, level: 'warning' })
     });

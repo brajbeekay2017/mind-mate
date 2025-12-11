@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import { API_URL } from '../config'
 
 const EMOJIS = ["😄","🙂","😐","😟","😢"];
 const STRESS_LABELS = ["Relaxed 😄", "Calm 🙂", "Neutral 😐", "Concerned 😟", "Stressed 😰", "Very Stressed 😰"];
@@ -27,7 +28,7 @@ export default function MoodInput({ onSaved }){
       const user = JSON.parse(localStorage.getItem('mindmate_user') || '{}');
       const userId = user.userId;
       
-      const res = await fetch(`http://localhost:4000/mood?userId=${userId}`, {
+      const res = await fetch(`${API_URL}/mood?userId=${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mood: moodIdx, stress: parseInt(stress), userId })

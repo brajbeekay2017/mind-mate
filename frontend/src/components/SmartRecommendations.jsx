@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config'
 
 export default function SmartRecommendations({ userId = 'user-1', workContext: initialWorkContext = 'office', companyRole: initialCompanyRole = 'engineer' }){
   const [recs, setRecs] = useState(null);
@@ -14,7 +15,7 @@ export default function SmartRecommendations({ userId = 'user-1', workContext: i
   useEffect(()=>{
     const fetchMoodHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/mood?userId=${encodeURIComponent(userId)}`);
+        const res = await fetch(`${API_URL}/mood?userId=${encodeURIComponent(userId)}`);
         if (res.ok) {
           const data = await res.json();
           setMoodHistory(data.entries || []);
@@ -29,10 +30,9 @@ export default function SmartRecommendations({ userId = 'user-1', workContext: i
           const token = localStorage.getItem('googlefit_token');
           if (!token) return;
 
-          // Fetch steps today and heart points in parallel
           const [stepsRes, heartRes] = await Promise.all([
-            fetch(`http://localhost:4000/google-fit/steps-today?accessToken=${encodeURIComponent(token)}`),
-            fetch(`http://localhost:4000/google-fit/heart-points?accessToken=${encodeURIComponent(token)}&days=1`)
+            fetch(`${API_URL}/google-fit/steps-today?accessToken=${encodeURIComponent(token)}`),
+            fetch(`${API_URL}/google-fit/heart-points?accessToken=${encodeURIComponent(token)}&days=1`)
           ]);
 
           const gf = {};
@@ -52,42 +52,20 @@ export default function SmartRecommendations({ userId = 'user-1', workContext: i
         }
     };
 
-    // Allow connecting Google Fit from this panel (replicates flow in GoogleFitPanel)
     const connectToGoogleFit = async () => {
       try {
-        const response = await fetch('http://localhost:4000/google-auth/auth-url');
+        const response = await fetch(`${API_URL}/google-auth/auth-url`);
         if (!response.ok) throw new Error('Failed to get authorization URL');
         const { authUrl } = await response.json();
-        if (!authUrl) throw new Error('No authorization URL');
-
-        const authWindow = window.open(authUrl, 'googleFitAuth', 'width=500,height=600');
-
-        const handleMessage = (event) => {
-          if (event.data?.type === 'GOOGLE_FIT_AUTH') {
-            const { accessToken, error: authError } = event.data;
-            if (authError) {
-              console.error('Google Fit auth error:', authError);
-            } else if (accessToken) {
-              localStorage.setItem('googlefit_token', accessToken);
-              setGfConnected(true);
-              // notify others and refresh local data
-              try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken } })); } catch (e) {}
-              fetchGoogleFit();
-            }
-            window.removeEventListener('message', handleMessage);
-            if (authWindow && !authWindow.closed) authWindow.close();
-          }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        // safety timeout
-        setTimeout(() => {
-          window.removeEventListener('message', handleMessage);
-          if (authWindow && !authWindow.closed) authWindow.close();
-        }, 5 * 60 * 1000);
-      } catch (err) {
-        console.error('Failed to initiate Google Fit connect:', err);
+        
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+        
+        window.open(authUrl, 'googleFitAuth', `width=${width},height=${height},left=${left},top=${top}`);
+      } catch (error) {
+        console.error('Error connecting to Google Fit:', error);
       }
     };
 
@@ -126,7 +104,7 @@ export default function SmartRecommendations({ userId = 'user-1', workContext: i
       };
       // allow lightweight requests that ask for brief guidance when data is sparse
       if (opts.lightweight) payload.mode = 'lightweight';
-      const res = await fetch('http://localhost:4000/recommendations/generate', {
+      const res = await fetch(`${API_URL}/recommendations/generate`, {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { API_URL } from '../config'
 import '../styles.css'
 
 export default function LoginPage({ onLogin }) {
@@ -45,7 +46,7 @@ export default function LoginPage({ onLogin }) {
 
       console.log('🔐 Fetching Google auth URL...');
       // Get auth URL from backend
-      const res = await fetch('http://localhost:4000/google-auth/auth-url');
+      const res = await fetch(`${API_URL}/google-auth/auth-url`);
       const data = await res.json();
 
       if (!res.ok || !data.authUrl) {

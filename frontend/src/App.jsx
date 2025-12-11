@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { API_URL } from './config'
 import ChatPanel from './components/ChatPanel'
 import MoodInput from './components/MoodInput'
 import TrendChart from './components/TrendChart'
@@ -11,7 +12,6 @@ import SmartRecommendations from './components/SmartRecommendations'
 import HistoricCalendar from './components/HistoricCalendar'
 import StressAlertNotification from './components/StressAlertNotification'
 import mindMateLogo from '../Images/MindMateFinal.png'
-import { API_URL } from './config'
 import './styles.css'
 
 export default function App({ onLogout }){
@@ -70,7 +70,7 @@ export default function App({ onLogout }){
         if (!userId) return;
         try {
           setSummaryLoading(true);
-          const res = await fetch(`http://localhost:4000/summary?userId=${userId}`);
+          const res = await fetch(`${API_URL}/summary?userId=${userId}`);
           if (!mounted) return;
           if (res.ok) {
             const data = await res.json();

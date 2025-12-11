@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const MOOD_EMOJIS = ["😄", "🙂", "😐", "😟", "😢"];
 const MOOD_LABELS = ["Very Happy", "Happy", "Neutral", "Concerned", "Very Sad"];
@@ -68,7 +69,7 @@ export default function HistoricCalendar({ entries = [], userId }) {
       const year = currentMonth.getFullYear();
       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
       
-      const res = await fetch(`http://localhost:4000/google-fit/monthly?accessToken=${token}&year=${year}&month=${month}`);
+      const res = await fetch(`${API_URL}/google-fit/monthly?accessToken=${token}&year=${year}&month=${month}`);
       if (res.ok) {
         const data = await res.json();
         // Normalize daily data so calendar has reliable numeric `steps`, `heartPoints`, and `sleepHours`.
@@ -111,7 +112,7 @@ export default function HistoricCalendar({ entries = [], userId }) {
       if (!userId) return;
       const year = currentMonth.getFullYear();
       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
-      const res = await fetch(`http://localhost:4000/mood/monthly?userId=${encodeURIComponent(userId)}&year=${year}&month=${month}`);
+      const res = await fetch(`${API_URL}/mood/monthly?userId=${encodeURIComponent(userId)}&year=${year}&month=${month}`);
       if (res.ok) {
         const data = await res.json();
         // Expecting { entries: [...] }
@@ -136,7 +137,7 @@ export default function HistoricCalendar({ entries = [], userId }) {
       const avgMood = getAverageMood(selectedDate);
       const avgStress = getAverageStress(selectedDate);
       
-      const res = await fetch('http://localhost:4000/chat', {
+      const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { API_URL } from '../config'
 
 export default function StressAlertNotification({ userId, refreshKey }) {
   const [stressData, setStressData] = useState(null)
@@ -14,7 +15,7 @@ export default function StressAlertNotification({ userId, refreshKey }) {
         setLoading(true)
         const gfData = JSON.parse(localStorage.getItem('googlefit_latest') || '{}')
         setGoogleFitData(gfData)
-        const res = await fetch('http://localhost:4000/alerts/stress-check', {
+        const res = await fetch(`${API_URL}/alerts/stress-check`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, googleFitData: gfData })

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_URL } from '../config';
 
 export default function StressRecoveryChallenge({ userId = 'user-1', workContext = 'office', companyRole = 'general' }){
   const [challenge, setChallenge] = useState(null);
@@ -23,7 +24,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   useEffect(()=>{
     const fetchMoodHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/mood?userId=${encodeURIComponent(userId)}`);
+        const res = await fetch(`${API_URL}/mood?userId=${encodeURIComponent(userId)}`);
         if (res.ok) {
           const data = await res.json();
           setMoodHistory(data.entries || []);
@@ -38,7 +39,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   useEffect(()=>{
     const fetchActiveChallenges = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/stress-recovery/active?userId=${encodeURIComponent(userId)}`);
+        const res = await fetch(`${API_URL}/stress-recovery/active?userId=${encodeURIComponent(userId)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.active && data.active.length > 0) {
@@ -62,7 +63,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
     
     const fetchHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
+        const res = await fetch(`${API_URL}/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
         if (res.ok) {
           const data = await res.json();
           setChallengeHistory(data.challenges || []);
@@ -79,7 +80,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   // Helper to refresh active challenge and history from backend
   async function refreshActiveChallenges() {
     try {
-      const res = await fetch(`http://localhost:4000/stress-recovery/active?userId=${encodeURIComponent(userId)}`);
+      const res = await fetch(`${API_URL}/stress-recovery/active?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
         const data = await res.json();
         if (data.active && data.active.length > 0) setActiveChallenge(data.active[0]);
@@ -91,14 +92,14 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
            localStorage.removeItem(`activeChallenge_${userId}`);
          }
       }
-      const h = await fetch(`http://localhost:4000/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
+      const h = await fetch(`${API_URL}/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
       if (h.ok) {
         const hd = await h.json();
         setChallengeHistory(hd.challenges || []);
       }
       // also refresh dashboard data
       try {
-        const dres = await fetch(`http://localhost:4000/stress-recovery/dashboard?userId=${encodeURIComponent(userId)}`);
+        const dres = await fetch(`${API_URL}/stress-recovery/dashboard?userId=${encodeURIComponent(userId)}`);
         if (dres.ok) {
           const dd = await dres.json();
           setDashboardData(dd);
@@ -112,7 +113,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   }
 
   useEffect(()=>{
-    const es = new EventSource(`http://localhost:4000/team-alerts/stream?userId=${encodeURIComponent(userId)}`);
+    const es = new EventSource(`${API_URL}/team-alerts/stream?userId=${encodeURIComponent(userId)}`);
     es.onmessage = (e) => {
       try{
         const payload = JSON.parse(e.data);
@@ -137,7 +138,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         workContext: workContext,
         companyRole: companyRole
       };
-      const res = await fetch('http://localhost:4000/stress-recovery/generate', {
+      const res = await fetch(`${API_URL}/stress-recovery/generate`, {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });
@@ -156,7 +157,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
     if(!challenge) return;
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/stress-recovery/start', {
+      const res = await fetch(`${API_URL}/stress-recovery/start`, {
         method: 'POST', 
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, challenge })
@@ -177,7 +178,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
 
   async function updateTaskProgress(challengeId, dayNumber, taskName, completed) {
     try {
-      await fetch('http://localhost:4000/stress-recovery/task-progress', {
+      await fetch(`${API_URL}/stress-recovery/task-progress`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, challengeId, dayNumber, taskName, completed })
@@ -195,7 +196,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
 
   async function completeDay(challengeId, dayNumber) {
     try {
-      const res = await fetch('http://localhost:4000/stress-recovery/day-complete', {
+      const res = await fetch(`${API_URL}/stress-recovery/day-complete`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, challengeId, dayNumber })
@@ -204,7 +205,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
       if (data.allComplete) {
         // challenge fully completed on backend; fetch latest history to get completed challenge details
         try {
-          const h = await fetch(`http://localhost:4000/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
+          const h = await fetch(`${API_URL}/stress-recovery/history?userId=${encodeURIComponent(userId)}`);
           if (h.ok) {
             const hd = await h.json();
             // assume the most recent completed challenge is first in list
@@ -241,7 +242,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         dayCompleted: completedDayNumber
       };
       
-      const res = await fetch('http://localhost:4000/mood', {
+      const res = await fetch(`${API_URL}/mood`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
@@ -255,7 +256,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
         setMoodFeeling('neutral');
         // Refresh mood history and dashboard/active challenge state
         try {
-          const mh = await fetch(`http://localhost:4000/mood?userId=${encodeURIComponent(userId)}`);
+          const mh = await fetch(`${API_URL}/mood?userId=${encodeURIComponent(userId)}`);
           if (mh.ok) {
             const mhd = await mh.json();
             setMoodHistory(mhd.entries || []);
@@ -275,7 +276,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   async function completeChallenge() {
     if(!activeChallenge) return;
     try {
-      await fetch('http://localhost:4000/stress-recovery/complete', {
+      await fetch(`${API_URL}/stress-recovery/complete`, {
         method: 'POST', 
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, challengeId: activeChallenge.id })
@@ -291,7 +292,7 @@ export default function StressRecoveryChallenge({ userId = 'user-1', workContext
   async function discardChallenge() {
     if(!activeChallenge) return;
     try {
-      await fetch('http://localhost:4000/stress-recovery/discard', {
+      await fetch(`${API_URL}/stress-recovery/discard`, {
         method: 'POST', 
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, challengeId: activeChallenge.id })

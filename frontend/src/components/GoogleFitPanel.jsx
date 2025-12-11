@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config'
 
 export default function GoogleFitPanel({ entries = [] }) {
   const [stepsToday, setStepsToday] = useState(0);
@@ -87,7 +88,7 @@ export default function GoogleFitPanel({ entries = [] }) {
       setError('');
       setLoading(true);
       
-      const response = await fetch('http://localhost:4000/google-auth/auth-url');
+      const response = await fetch(`${API_URL}/google-auth/auth-url`);
       
       if (!response.ok) {
         throw new Error('Failed to get authorization URL');
@@ -130,9 +131,8 @@ export default function GoogleFitPanel({ entries = [] }) {
       }, 5 * 60 * 1000);
       
     } catch (err) {
-      console.error('Failed to connect Google Fit:', err);
-      setError(`Connection error: ${err.message}`);
-    } finally {
+      console.error('Connect error:', err);
+      setError(err.message);
       setLoading(false);
     }
   };
@@ -145,14 +145,9 @@ export default function GoogleFitPanel({ entries = [] }) {
       console.log('[GoogleFitPanel] Starting data fetch with token:', accessToken.substring(0, 20) + '...');
 
       // Fetch steps, heart points, and target steps
-      const stepsRes = await fetch(`http://localhost:4000/google-fit/steps-today?accessToken=${encodeURIComponent(accessToken)}`);
-      console.log('[GoogleFitPanel] Steps endpoint response:', stepsRes.status);
-      
-      const heartRes = await fetch(`http://localhost:4000/google-fit/heart-points?accessToken=${encodeURIComponent(accessToken)}`);
-      console.log('[GoogleFitPanel] Heart points endpoint response:', heartRes.status);
-      
-      const targetRes = await fetch(`http://localhost:4000/google-fit/target-steps?accessToken=${encodeURIComponent(accessToken)}`);
-      console.log('[GoogleFitPanel] Target steps endpoint response:', targetRes.status);
+      const stepsRes = await fetch(`${API_URL}/google-fit/steps-today?accessToken=${encodeURIComponent(accessToken)}`);
+      const heartRes = await fetch(`${API_URL}/google-fit/heart-points?accessToken=${encodeURIComponent(accessToken)}`);
+      const targetRes = await fetch(`${API_URL}/google-fit/target-steps?accessToken=${encodeURIComponent(accessToken)}`);
       
       // Check for 401 errors (token expired)
       if (stepsRes.status === 401 || heartRes.status === 401) {
@@ -231,9 +226,8 @@ export default function GoogleFitPanel({ entries = [] }) {
       }
       
     } catch (err) {
-      console.error('[GoogleFitPanel] ❌ Fetch error:', err);
-      setError(`Data fetch error: ${err.message}`);
-    } finally {
+      console.error('Fetch error:', err);
+      setError(err.message);
       setLoading(false);
     }
   };
@@ -241,8 +235,8 @@ export default function GoogleFitPanel({ entries = [] }) {
   const fetchSevenDayData = async (accessToken) => {
     try {
       const [stepsRes, heartRes] = await Promise.all([
-        fetch(`http://localhost:4000/google-fit/steps?accessToken=${accessToken}&days=7`),
-        fetch(`http://localhost:4000/google-fit/heart-rate?accessToken=${accessToken}&days=7`)
+        fetch(`${API_URL}/google-fit/steps?accessToken=${accessToken}&days=7`),
+        fetch(`${API_URL}/google-fit/heart-rate?accessToken=${accessToken}&days=7`)
       ]);
       
       if (!stepsRes.ok || !heartRes.ok) {
