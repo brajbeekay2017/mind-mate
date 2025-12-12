@@ -258,6 +258,50 @@ router.post('/complete', async (req, res) => {
   }
 });
 
+// Discard a challenge
+router.post('/discard', async (req, res) => {
+  const userId = req.body.userId;
+  const challengeId = req.body.challengeId;
+  if (!userId || !challengeId) {
+    return res.status(400).json({ error: 'userId and challengeId required' });
+  }
+  
+  try {
+    const allData = await readData();
+    if (!allData.challenges || !allData.challenges[userId]) {
+      return res.status(404).json({ error: 'No challenges found for user' });
+    }
+    
+    const challenge = allData.challenges[userId].find(c => c.id === challengeId);
+    if (!challenge) {
+      return res.status(404).json({ error: 'Challenge not found' });
+    }
+    
+    // Mark as discarded
+    challenge.status = 'discarded';
+    challenge.discardedTime = Date.now();
+    
+    await fs.writeFile(DATA_PATH, JSON.stringify(allData, null, 2));
+    console.log(`❌ [Challenge] Discarded: ${challenge.name} for ${userId}`);
+    
+    // Broadcast discard event
+    broadcaster.publish('stress-recovery', { 
+      type: 'discard', 
+      userId, 
+      challengeId,
+      challengeName: challenge.name,
+      timestamp: Date.now() 
+    }, (meta) => {
+      return meta && (meta.userId === userId || meta.isAdmin);
+    });
+    
+    res.json({ success: true, message: 'Challenge discarded' });
+  } catch (e) {
+    console.error('Discard challenge error:', e);
+    res.status(500).json({ error: e.message || 'Failed to discard challenge' });
+  }
+});
+
 // Get active challenges
 router.get('/active', async (req, res) => {
   const userId = req.query.userId || 'anonymous';
