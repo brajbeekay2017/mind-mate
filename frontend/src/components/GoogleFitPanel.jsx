@@ -1,5 +1,9 @@
+console.log('📦 [GoogleFitPanel.jsx] Loading...');
+
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config'
+import { API_URL } from '../config';
+
+console.log('✅ [GoogleFitPanel.jsx] Config imported, API_URL:', API_URL);
 
 export default function GoogleFitPanel({ entries = [] }) {
   const [stepsToday, setStepsToday] = useState(0);
@@ -15,11 +19,15 @@ export default function GoogleFitPanel({ entries = [] }) {
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
 
+  // ✅ Component mounted flag
+  let mounted = true;
+
   useEffect(() => {
-    // Check immediately on mount
-    const token = localStorage.getItem('googlefit_token');
+    mounted = true;
     console.log('[GoogleFitPanel] ========================================');
     console.log('[GoogleFitPanel] Component mounted!');
+    
+    const token = localStorage.getItem('googlefit_token');
     console.log('[GoogleFitPanel] Token check:', token ? `Token found (${token.substring(0, 20)}...)` : 'NO TOKEN FOUND');
     
     if (token) {
@@ -31,22 +39,23 @@ export default function GoogleFitPanel({ entries = [] }) {
 
     // Listen for storage changes
     const handleStorageChange = (e) => {
-      if (e.key === 'googlefit_token' && e.newValue) {
+      if (e.key === 'googlefit_token' && e.newValue && mounted) {
         console.log('[GoogleFitPanel] Storage event: token added');
         checkGoogleFitConnection();
       }
     };
 
-    // Listen for custom event (when LoginPage adds token)
+    // Listen for custom event
     const handleTokenAdded = (e) => {
       console.log('[GoogleFitPanel] Custom event: googlefit_token_added', e.detail);
-      checkGoogleFitConnection();
+      if (mounted) checkGoogleFitConnection();
     };
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('googlefit_token_added', handleTokenAdded);
 
     return () => {
+      mounted = false;
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('googlefit_token_added', handleTokenAdded);
     };
@@ -61,14 +70,13 @@ export default function GoogleFitPanel({ entries = [] }) {
 
     console.log('[GoogleFitPanel] 🔄 Auto-refresh scheduled (every 10 minutes)');
     
-    // First refresh after 10 minutes
     const autoRefreshInterval = setInterval(() => {
       const currentToken = localStorage.getItem('googlefit_token');
-      if (currentToken && autoRefreshEnabled) {
+      if (currentToken && autoRefreshEnabled && mounted) {
         console.log('[GoogleFitPanel] 🔄 Auto-refresh triggered...');
         fetchGoogleFitData(currentToken);
       }
-    }, 10 * 60 * 1000); // 10 minutes
+    }, 10 * 60 * 1000);
 
     return () => clearInterval(autoRefreshInterval);
   }, [autoRefreshEnabled, isConnected]);
@@ -76,7 +84,7 @@ export default function GoogleFitPanel({ entries = [] }) {
   const checkGoogleFitConnection = () => {
     const token = localStorage.getItem('googlefit_token');
     console.log('[GoogleFitPanel] checkGoogleFitConnection called, token:', token ? 'exists' : 'missing');
-    if (token) {
+    if (token && mounted) {
       setIsConnected(true);
       setShowDetails(true);
       fetchGoogleFitData(token);
@@ -85,6 +93,7 @@ export default function GoogleFitPanel({ entries = [] }) {
 
   const connectToGoogleFit = async () => {
     try {
+      if (!mounted) return;
       setError('');
       setLoading(true);
       
@@ -107,14 +116,16 @@ export default function GoogleFitPanel({ entries = [] }) {
           const { accessToken, error: authError } = event.data;
           
           if (authError) {
-            setError(`Authorization failed: ${authError}`);
-            setLoading(false);
+            if (mounted) setError(`Authorization failed: ${authError}`);
+            if (mounted) setLoading(false);
           } else if (accessToken) {
             localStorage.setItem('googlefit_token', accessToken);
-            setIsConnected(true);
-            setShowDetails(true);
-            setError('');
-            fetchGoogleFitData(accessToken);
+            if (mounted) {
+              setIsConnected(true);
+              setShowDetails(true);
+              setError('');
+              fetchGoogleFitData(accessToken);
+            }
             window.removeEventListener('message', handleMessage);
             if (authWindow && !authWindow.closed) authWindow.close();
           }
@@ -131,81 +142,128 @@ export default function GoogleFitPanel({ entries = [] }) {
       }, 5 * 60 * 1000);
       
     } catch (err) {
-      console.error('Connect error:', err);
-      setError(err.message);
-      setLoading(false);
+      console.error('Failed to connect Google Fit:', err);
+      if (mounted) {
+        setError(`Connection error: ${err.message}`);
+        setLoading(false);
+      }
     }
   };
 
   const fetchGoogleFitData = async (accessToken) => {
+    if (!mounted) return;
+    
     try {
       setLoading(true);
       setError('');
       
       console.log('[GoogleFitPanel] Starting data fetch with token:', accessToken.substring(0, 20) + '...');
+      console.log('[GoogleFitPanel] Using API_URL:', API_URL);
 
-      // Fetch steps, heart points, and target steps
-      const stepsRes = await fetch(`${API_URL}/google-fit/steps-today?accessToken=${encodeURIComponent(accessToken)}`);
-      const heartRes = await fetch(`${API_URL}/google-fit/heart-points?accessToken=${encodeURIComponent(accessToken)}`);
-      const targetRes = await fetch(`${API_URL}/google-fit/target-steps?accessToken=${encodeURIComponent(accessToken)}`);
+      // ✅ Validate API_URL
+      if (!API_URL || API_URL.includes('undefined')) {
+        throw new Error('API_URL not properly configured');
+      }
+
+      // ✅ Fetch with timeout
+      const fetchWithTimeout = (url, timeout = 10000) => {
+        return Promise.race([
+          fetch(url),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+          )
+        ]);
+      };
+
+      const stepsUrl = `${API_URL}/google-fit/steps-today?accessToken=${encodeURIComponent(accessToken)}`;
+      const heartUrl = `${API_URL}/google-fit/heart-points?accessToken=${encodeURIComponent(accessToken)}`;
+      const targetUrl = `${API_URL}/google-fit/target-steps?accessToken=${encodeURIComponent(accessToken)}`;
       
-      // Check for 401 errors (token expired)
+      console.log('[GoogleFitPanel] Fetching from:', stepsUrl);
+      
+      const [stepsRes, heartRes, targetRes] = await Promise.all([
+        fetchWithTimeout(stepsUrl),
+        fetchWithTimeout(heartUrl),
+        fetchWithTimeout(targetUrl).catch(err => {
+          console.warn('[GoogleFitPanel] Target steps timeout (optional):', err.message);
+          return new Response(JSON.stringify({ data: { targetSteps: 10000 } }));
+        })
+      ]);
+      
+      console.log('[GoogleFitPanel] Response statuses:', { steps: stepsRes.status, heart: heartRes.status, target: targetRes.status });
+
+      // Check for 401 errors
       if (stepsRes.status === 401 || heartRes.status === 401) {
         console.warn('[GoogleFitPanel] Received 401 - Token expired');
-        setTokenExpired(true);
-        setError('🔄 Google Fit authorization expired. Please reconnect.');
-        setIsConnected(false);
-        setLoading(false);
+        if (mounted) {
+          setTokenExpired(true);
+          setError('🔄 Google Fit authorization expired. Please reconnect.');
+          setIsConnected(false);
+        }
         return;
       }
-      
-      // Check response status and log errors
+
+      // Check response status
       if (!stepsRes.ok) {
         const stepsError = await stepsRes.text();
         console.error('[GoogleFitPanel] ❌ Steps fetch failed:', stepsRes.status, stepsError);
-        setError(`Steps fetch failed (${stepsRes.status})`);
-        setLoading(false);
+        if (mounted) setError(`Steps fetch failed (${stepsRes.status})`);
         return;
       }
-      
+
       if (!heartRes.ok) {
         const heartError = await heartRes.text();
         console.error('[GoogleFitPanel] ❌ Heart points fetch failed:', heartRes.status, heartError);
-        setError(`Heart data fetch failed (${heartRes.status})`);
-        setLoading(false);
+        if (mounted) setError(`Heart data fetch failed (${heartRes.status})`);
         return;
       }
+
+      // ✅ Parse responses
+      let stepsData, heartData, targetData;
       
-      if (!targetRes.ok) {
-        const targetError = await targetRes.text();
-        console.error('[GoogleFitPanel] ❌ Target steps fetch failed:', targetRes.status, targetError);
-        // Don't fail entirely if target-steps fails, as it's optional
-        console.warn('[GoogleFitPanel] Target steps fetch failed, using default 10000');
-      }
-      
-      // Parse successful responses
       try {
-        const stepsData = await stepsRes.json();
-        const heartData = await heartRes.json();
-        const targetData = targetRes.ok ? await targetRes.json() : { data: { targetSteps: 10000 } };
-        
-        console.log('[GoogleFitPanel] ✅ Parsed responses:', { stepsData, heartData, targetData });
-        
-        if (stepsData.success) {
-          setStepsToday(stepsData.data.steps || 0);
-          console.log('[GoogleFitPanel] Steps set to:', stepsData.data.steps || 0);
+        stepsData = await stepsRes.json();
+        console.log('[GoogleFitPanel] ✅ Steps data:', stepsData);
+      } catch (parseErr) {
+        console.error('[GoogleFitPanel] ❌ Steps JSON parse error:', parseErr);
+        if (mounted) setError('Failed to parse steps data');
+        return;
+      }
+
+      try {
+        heartData = await heartRes.json();
+        console.log('[GoogleFitPanel] ✅ Heart data:', heartData);
+      } catch (parseErr) {
+        console.error('[GoogleFitPanel] ❌ Heart JSON parse error:', parseErr);
+        if (mounted) setError('Failed to parse heart data');
+        return;
+      }
+
+      try {
+        targetData = await targetRes.json();
+        console.log('[GoogleFitPanel] ✅ Target data:', targetData);
+      } catch (parseErr) {
+        console.warn('[GoogleFitPanel] ⚠️ Target JSON parse error (optional):', parseErr);
+        targetData = { data: { targetSteps: 10000 } };
+      }
+
+      // ✅ Update state
+      if (mounted) {
+        if (stepsData.success || stepsData.data) {
+          setStepsToday(stepsData.data?.steps || 0);
+          console.log('[GoogleFitPanel] Steps set to:', stepsData.data?.steps || 0);
         }
-        
-        if (heartData.success) {
-          setHeartPoints(heartData.data.heartPoints || 0);
-          console.log('[GoogleFitPanel] Heart points set to:', heartData.data.heartPoints || 0);
+
+        if (heartData.success || heartData.data) {
+          setHeartPoints(heartData.data?.heartPoints || 0);
+          console.log('[GoogleFitPanel] Heart points set to:', heartData.data?.heartPoints || 0);
         }
-        
+
         if (targetData.success || targetData.data) {
-          setTargetSteps(targetData.data.targetSteps || 10000);
+          setTargetSteps(targetData.data?.targetSteps || 10000);
         }
-        
-        // Store latest data in localStorage
+
+        // Store in localStorage
         const googleFitLatest = {
           stepsToday: stepsData.data?.steps || 0,
           heartPoints: heartData.data?.heartPoints || 0,
@@ -213,22 +271,33 @@ export default function GoogleFitPanel({ entries = [] }) {
           timestamp: new Date().toISOString()
         };
         localStorage.setItem('googlefit_latest', JSON.stringify(googleFitLatest));
-        
-        // ✅ Update last refresh time
+
         setLastRefreshTime(new Date());
-        
-        console.log('[GoogleFitPanel] ✅ Data fetch successful, fetching 7-day data...');
-        await fetchSevenDayData(accessToken);
-        
-      } catch (parseErr) {
-        console.error('[GoogleFitPanel] ❌ JSON parse error:', parseErr);
-        setError(`Parse error: ${parseErr.message}`);
+        setError('');
       }
+
+      console.log('[GoogleFitPanel] ✅ Data fetch successful');
       
+      // Fetch 7-day data
+      if (mounted) {
+        try {
+          await fetchSevenDayData(accessToken);
+        } catch (sevenDayErr) {
+          console.warn('[GoogleFitPanel] ⚠️ 7-day data fetch failed:', sevenDayErr.message);
+        }
+      }
+
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.message);
-      setLoading(false);
+      console.error('[GoogleFitPanel] ❌ Fetch error:', err.message);
+      if (mounted) {
+        setError(`Data fetch error: ${err.message}`);
+      }
+    } finally {
+      // ✅ Always clear loading state
+      if (mounted) {
+        setLoading(false);
+        console.log('[GoogleFitPanel] Loading state cleared');
+      }
     }
   };
 
@@ -247,32 +316,22 @@ export default function GoogleFitPanel({ entries = [] }) {
       const stepsData = await stepsRes.json();
       const heartData = await heartRes.json();
       
-      setSevenDayData({
-        steps: stepsData.data,
-        heart: heartData.data
-      });
-      
-      if (heartData.success && heartData.data?.dailyAverages?.length > 0) {
-        const dailyAverages = heartData.data.dailyAverages;
-        const minHeartRate = Math.min(...dailyAverages.map(d => d.average));
-        
-        const googleFitLatest = JSON.parse(localStorage.getItem('googlefit_latest') || '{}');
-        googleFitLatest.restingHeartRate = minHeartRate;
-        googleFitLatest.avgHeartRate = Math.round(dailyAverages.reduce((sum, d) => sum + d.average, 0) / dailyAverages.length);
-        localStorage.setItem('googlefit_latest', JSON.stringify(googleFitLatest));
+      if (mounted) {
+        setSevenDayData({
+          steps: stepsData.data,
+          heart: heartData.data
+        });
       }
     } catch (err) {
       console.error('Failed to fetch 7-day data:', err);
     }
   };
 
-  // ✅ Manual refresh handler
   const handleRefresh = async () => {
     const token = localStorage.getItem('googlefit_token');
     if (token) {
       console.log('[GoogleFitPanel] 🔄 Manual refresh triggered...');
       await fetchGoogleFitData(token);
-      try { window.dispatchEvent(new CustomEvent('googlefit_connected', { detail: { accessToken: token } })); } catch(e) {}
     }
   };
 
@@ -297,8 +356,6 @@ export default function GoogleFitPanel({ entries = [] }) {
               transition: 'all 0.3s ease',
               marginBottom: error ? '8px' : 0
             }}
-            onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
-            onMouseOut={(e) => !loading && (e.target.style.transform = 'translateY(0)')}
           >
             {loading ? '⏳ Connecting...' : '🔗 Connect Google Fit'}
           </button>
@@ -347,7 +404,6 @@ export default function GoogleFitPanel({ entries = [] }) {
 
           {showDetails && (
             <>
-              {/* Period Tabs */}
               <div style={{ display: 'flex', gap: 3, marginBottom: '8px', borderBottom: '1px solid #ddd', paddingBottom: '6px' }}>
                 <button
                   onClick={() => setTimePeriod('today')}
@@ -397,7 +453,6 @@ export default function GoogleFitPanel({ entries = [] }) {
                 justifyContent: 'center'
               }}>
                 {loading ? (
-                  // ✅ NEW: Enhanced loading state
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div className="skeleton" style={{ height: '12px', width: '80%', borderRadius: '4px' }} />
                     <div className="skeleton" style={{ height: '12px', width: '60%', borderRadius: '4px' }} />
@@ -464,7 +519,6 @@ export default function GoogleFitPanel({ entries = [] }) {
                 </div>
               )}
 
-              {/* ✅ SIMPLIFIED: Only Refresh Button with better styling */}
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'space-between' }}>
                 <button
                   onClick={handleRefresh}
@@ -484,14 +538,11 @@ export default function GoogleFitPanel({ entries = [] }) {
                     boxShadow: loading ? 'none' : '0 4px 12px rgba(79, 209, 197, 0.3)',
                     opacity: loading ? 0.7 : 1
                   }}
-                  onMouseOver={(e) => !loading && (e.target.style.boxShadow = '0 6px 20px rgba(79, 209, 197, 0.4)')}
-                  onMouseOut={(e) => !loading && (e.target.style.boxShadow = '0 4px 12px rgba(79, 209, 197, 0.3)')}
                 >
                   {loading ? '⏳ Syncing...' : '🔄 Sync Now'}
                 </button>
               </div>
 
-              {/* ✅ Enhanced: Last refresh time and auto-refresh status */}
               <div style={{
                 marginTop: '10px',
                 padding: '8px 10px',
