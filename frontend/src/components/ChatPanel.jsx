@@ -24,16 +24,45 @@ export default function ChatPanel(){
   const textareaRef = useRef();
   const messagesContainerRef = useRef();
 
+  // ✅ ENHANCED: Smooth auto-scroll on new messages (especially AI replies)
   useEffect(()=> { 
-    // Only auto-scroll if user is already at bottom
-    if (messagesContainerRef.current) {
-      const container = messagesContainerRef.current;
-      const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
-      if (isAtBottom) {
-        endRef.current?.scrollIntoView({behavior:'smooth'}); 
-      }
+    if (messagesContainerRef.current && endRef.current) {
+      // Always scroll to bottom when messages change
+      // This ensures AI replies are immediately visible
+      setTimeout(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 50); // Small delay to ensure DOM has updated
     }
   }, [messages]);
+
+  // ✅ NEW: Force scroll to bottom when AI reply completes (loading state changes)
+  useEffect(() => {
+    if (!isLoading && messagesContainerRef.current && endRef.current) {
+      // Force scroll to bottom when loading completes (AI reply arrived)
+      setTimeout(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+        endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 100); // Delay to allow rendering
+    }
+  }, [isLoading]);
+
+  // ✅ NEW: Programmatic scroll function for manual trigger
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current && endRef.current) {
+      setTimeout(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          // Method 1: Direct scroll
+          container.scrollTop = container.scrollHeight;
+          // Method 2: Smooth scroll with animation
+          endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 50);
+    }
+  };
 
   const handleKeyDown = (e) => {
     // Submit on Enter (but not Shift+Enter for new line)
@@ -61,6 +90,7 @@ export default function ChatPanel(){
     }
   };
 
+  // ✅ Update the send function to call scrollToBottom after AI reply
   async function send(){
     if(!text.trim() || isLoading) return;
     const msg = text;
@@ -73,6 +103,9 @@ export default function ChatPanel(){
     // Add user message and placeholder bot message
     setMessages(m => [...m, { from: 'user', text: msg }, { from: 'bot', text: '...' }]);
     setIsLoading(true);
+    
+    // ✅ Scroll to bottom after user message appears
+    setTimeout(() => scrollToBottom(), 100);
     
     try{
       // Request Groq response
@@ -97,6 +130,9 @@ export default function ChatPanel(){
         copy[copy.length - 1].isMarkdown = true; // ✅ Flag for markdown rendering
         return copy;
       });
+      
+      // ✅ Force scroll to bottom after AI reply arrives
+      setTimeout(() => scrollToBottom(), 150);
     }catch(e){
       console.error('Chat error:', e);
       setMessages(m => {
@@ -104,6 +140,9 @@ export default function ChatPanel(){
         copy[copy.length - 1].text = 'Sorry, I could not reach the chat service.';
         return copy;
       });
+      
+      // ✅ Still scroll to bottom to show error message
+      setTimeout(() => scrollToBottom(), 150);
     }
     
     setIsLoading(false);
@@ -365,15 +404,161 @@ export default function ChatPanel(){
 
   return (
     <div style={{display:'flex',flexDirection:'column',height:'100%',background:'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',minHeight:0,flex:1}}>
-      <div ref={messagesContainerRef} style={{flex:1, overflowY:'auto', padding:'12px', background:'linear-gradient(180deg, rgba(111, 168, 241, 0.02) 0%, rgba(79, 209, 197, 0.02) 100%)'}}>
+      {/* ✅ ENHANCED: Messages Container with conditional scrollbar */}
+      <div 
+        ref={messagesContainerRef} 
+        style={{
+          flex:1, 
+          overflowY: messages.length === 0 ? 'hidden' : 'auto',
+          padding:'12px', 
+          background:'linear-gradient(180deg, rgba(111, 168, 241, 0.02) 0%, rgba(79, 209, 197, 0.02) 100%)',
+          display: messages.length === 0 ? 'flex' : 'block',
+          alignItems: messages.length === 0 ? 'center' : 'flex-start',
+          justifyContent: messages.length === 0 ? 'center' : 'flex-start'
+        }}
+      >
         {messages.length === 0 ? (
-          // ✅ Empty state for chat
-          <div className="empty-state" style={{height:'100%',justifyContent:'center'}}>
-            <div className="empty-state-icon">💬</div>
-            <div className="empty-state-title">Start a conversation</div>
-            <div className="empty-state-text">Share what's on your mind or ask for support. I'm here to listen.</div>
+          // ✅ REFINED: Clean empty state with better spacing
+          <div style={{
+            textAlign:'center',
+            display:'flex',
+            flexDirection:'column',
+            alignItems:'center',
+            justifyContent:'center',
+            height:'100%',
+            width:'100%',
+            padding: '40px 20px',
+            animation: 'fadeInContainer 0.6s ease-out'
+          }}>
+            <style>{`
+              @keyframes fadeInContainer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+              }
+
+              @keyframes floatIcon {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-8px); }
+              }
+
+              @keyframes glowPulse {
+                0%, 100% {
+                  box-shadow: 0 0 20px rgba(111, 168, 241, 0.3), 
+                              0 0 40px rgba(79, 209, 197, 0.15);
+                }
+                50% {
+                  box-shadow: 0 0 30px rgba(111, 168, 241, 0.5), 
+                              0 0 60px rgba(79, 209, 197, 0.25);
+                }
+              }
+
+              @keyframes slideInDown {
+                from {
+                  opacity: 0;
+                  transform: translateY(-15px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+
+              @keyframes slideInUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(15px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+            `}</style>
+
+            {/* ✅ REFINED: Icon container - cleaner */}
+            <div
+              style={{
+                fontSize: '56px',
+                marginBottom: '20px',
+                display:'flex',
+                alignItems:'center',
+                justifyContent:'center',
+                width:'100px',
+                height:'100px',
+                background: 'linear-gradient(135deg, rgba(111, 168, 241, 0.08) 0%, rgba(79, 209, 197, 0.08) 100%)',
+                borderRadius: '50%',
+                border: '2px solid rgba(111, 168, 241, 0.15)',
+                animation: 'floatIcon 3s ease-in-out infinite, glowPulse 3s ease-in-out infinite'
+              }}
+            >
+              💬
+            </div>
+
+            {/* ✅ Title - clean typography */}
+            <h2 style={{
+              margin: '0 0 10px 0',
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#0F4761',
+              animation: 'slideInDown 0.7s ease-out 0.15s both',
+              letterSpacing: '-0.3px'
+            }}>
+              Start a conversation
+            </h2>
+
+            {/* ✅ Description - refined */}
+            <p style={{
+              margin: '0 0 24px 0',
+              fontSize: '13px',
+              color: '#999',
+              lineHeight: '1.5',
+              maxWidth: '260px',
+              animation: 'slideInUp 0.7s ease-out 0.3s both'
+            }}>
+              Share what's on your mind or ask for support. I'm here to listen.
+            </p>
+
+            {/* ✅ REFINED: Suggestion pills - fewer, cleaner */}
+            <div style={{
+              display: 'flex',
+              gap: '10px',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              animation: 'slideInUp 0.7s ease-out 0.45s both'
+            }}>
+              {['💭 Share', '🌟 Inspire', '📊 Tips'].map((text, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '7px 12px',
+                    background: 'linear-gradient(135deg, rgba(111, 168, 241, 0.1) 0%, rgba(79, 209, 197, 0.05) 100%)',
+                    border: '1px solid rgba(111, 168, 241, 0.15)',
+                    borderRadius: '18px',
+                    fontSize: '11px',
+                    color: '#6FA8F1',
+                    fontWeight: '500',
+                    cursor: 'default',
+                    transition: 'all 0.3s ease',
+                    userSelect: 'none'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(111, 168, 241, 0.15) 0%, rgba(79, 209, 197, 0.1) 100%)';
+                    e.currentTarget.style.borderColor = 'rgba(111, 168, 241, 0.3)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(111, 168, 241, 0.1) 0%, rgba(79, 209, 197, 0.05) 100%)';
+                    e.currentTarget.style.borderColor = 'rgba(111, 168, 241, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {text}
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
+          // ✅ Messages list when data exists
           messages.map((msg, i) => (
             <div
               key={i}
@@ -438,17 +623,12 @@ export default function ChatPanel(){
                 />
               ))}
             </div>
-            <style>{`
-              @keyframes bounce {
-                0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
-                40% { transform: translateY(-8px); opacity: 1; }
-              }
-            `}</style>
           </div>
         )}
         <div ref={endRef} style={{flexShrink:0}} />
       </div>
 
+      {/* ✅ Input section */}
       <div style={{display:'flex',padding:12,borderTop:'1px solid rgba(0,0,0,0.1)',background:'#fff',gap:8,flexShrink:0,flexDirection:'column'}}>
         {/* Quick prompts dropdown */}
         <div style={{position:'relative'}}>
