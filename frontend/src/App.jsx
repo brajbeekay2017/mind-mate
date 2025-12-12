@@ -1,5 +1,10 @@
+console.log('📦 [App.jsx] Loading...');
+
 import React, { useEffect, useState } from 'react'
 import { API_URL } from './config'
+
+console.log('✅ [App.jsx] Config imported, API_URL:', API_URL);
+
 import ChatPanel from './components/ChatPanel'
 import MoodInput from './components/MoodInput'
 import TrendChart from './components/TrendChart'
